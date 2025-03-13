@@ -35,8 +35,8 @@ class FilamentMediaManagerInstall extends Command
             return;
         }
 
-        // Ambil semua file stub di folder
-        $files = File::glob("$stubsPath/*.stub");
+        // Ambil dan urutkan stub berdasarkan nama
+        $files = collect(File::glob("$stubsPath/*.stub"))->sort()->all();
 
         foreach ($files as $file) {
             $basename = basename($file, '.stub');
@@ -53,7 +53,7 @@ class FilamentMediaManagerInstall extends Command
             File::copy($file, $newFilePath);
             $this->info("✅ Created Migration: $newFilename");
 
-            // Tunggu 1 detik untuk memastikan timestamp unik
+            // Tunggu 1 detik agar timestamp tidak sama
             sleep(1);
         }
 
