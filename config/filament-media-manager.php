@@ -2,8 +2,8 @@
 
 return [
     "model" => [
-        "folder" => \TomatoPHP\FilamentMediaManager\Models\Folder::class,
-        "media" => \TomatoPHP\FilamentMediaManager\Models\Media::class,
+        "folder" => \Juniyasyos\FilamentMediaManager\Models\Folder::class,
+        "media" => \Juniyasyos\FilamentMediaManager\Models\Media::class,
     ],
 
     "api" => [
@@ -14,9 +14,9 @@ return [
         ],
         "prefix" => "api/media-manager",
         "resources" => [
-            "folders" => \TomatoPHP\FilamentMediaManager\Http\Resources\FoldersResource::class,
-            "folder" => \TomatoPHP\FilamentMediaManager\Http\Resources\FolderResource::class,
-            "media" => \TomatoPHP\FilamentMediaManager\Http\Resources\MediaResource::class
+            "folders" => \Juniyasyos\FilamentMediaManager\Http\Resources\FoldersResource::class,
+            "folder" => \Juniyasyos\FilamentMediaManager\Http\Resources\FolderResource::class,
+            "media" => \Juniyasyos\FilamentMediaManager\Http\Resources\MediaResource::class
         ]
     ],
 
