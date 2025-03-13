@@ -31,12 +31,6 @@ class FilamentMediaManagerServiceProvider extends ServiceProvider
             __DIR__ . '/../config/filament-media-manager.php' => config_path('filament-media-manager.php'),
         ], 'filament-media-manager-config');
 
-        // Load and Publish Migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations'),
-        ], 'filament-media-manager-migrations');
-
         // Load and Publish Views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'filament-media-manager');
         $this->publishes([
