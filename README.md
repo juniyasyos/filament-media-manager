@@ -1,17 +1,17 @@
-![Screenshot](https://raw.githubusercontent.com/tomatophp/filament-media-manager/master/arts/3x1io-tomato-media-manager.jpg)
+![Screenshot](https://raw.githubusercontent.com/juniyasyos/filament-media-manager/master/arts/3x1io-tomato-media-manager.jpg)
 
 # Filament media manager
 
-[![Latest Stable Version](https://poser.pugx.org/tomatophp/filament-media-manager/version.svg)](https://packagist.org/packages/tomatophp/filament-media-manager)
-[![License](https://poser.pugx.org/tomatophp/filament-media-manager/license.svg)](https://packagist.org/packages/tomatophp/filament-media-manager)
-[![Downloads](https://poser.pugx.org/tomatophp/filament-media-manager/d/total.svg)](https://packagist.org/packages/tomatophp/filament-media-manager)
+[![Latest Stable Version](https://poser.pugx.org/juniyasyos/filament-media-manager/version.svg)](https://packagist.org/packages/juniyasyos/filament-media-manager)
+[![License](https://poser.pugx.org/juniyasyos/filament-media-manager/license.svg)](https://packagist.org/packages/juniyasyos/filament-media-manager)
+[![Downloads](https://poser.pugx.org/juniyasyos/filament-media-manager/d/total.svg)](https://packagist.org/packages/juniyasyos/filament-media-manager)
 
 Manage your media files using spatie media library with easy to use GUI for FilamentPHP
 
 ## Installation
 
 ```bash
-composer require tomatophp/filament-media-manager
+composer require juniyasyos/filament-media-manager
 ```
 
 after install your package please run this command
@@ -23,7 +23,7 @@ php artisan filament-media-manager:install
 finally register the plugin on `/app/Providers/Filament/AdminPanelProvider.php`, if you like to use GUI and Folder Browser.
 
 ```php
-->plugin(\TomatoPHP\FilamentMediaManager\FilamentMediaManagerPlugin::make())
+->plugin(\Juniyasyos\FilamentMediaManager\FilamentMediaManagerPlugin::make())
 ```
 
 ## Features
@@ -37,11 +37,11 @@ finally register the plugin on `/app/Providers/Filament/AdminPanelProvider.php`,
 
 ## Screenshots
 
-![Folders](https://raw.githubusercontent.com/tomatophp/filament-media-manager/master/arts/folders.png)
-![Folder Password](https://raw.githubusercontent.com/tomatophp/filament-media-manager/master/arts/folder-password.png)
-![Media](https://raw.githubusercontent.com/tomatophp/filament-media-manager/master/arts/media.png)
-![Media Inputs](https://raw.githubusercontent.com/tomatophp/filament-media-manager/master/arts/media-input.png)
-![Media Component](https://raw.githubusercontent.com/tomatophp/filament-media-manager/master/arts/media-component.png)
+![Folders](https://raw.githubusercontent.com/juniyasyos/filament-media-manager/master/arts/folders.png)
+![Folder Password](https://raw.githubusercontent.com/juniyasyos/filament-media-manager/master/arts/folder-password.png)
+![Media](https://raw.githubusercontent.com/juniyasyos/filament-media-manager/master/arts/media.png)
+![Media Inputs](https://raw.githubusercontent.com/juniyasyos/filament-media-manager/master/arts/media-input.png)
+![Media Component](https://raw.githubusercontent.com/juniyasyos/filament-media-manager/master/arts/media-component.png)
 
 
 ## Usage
@@ -169,7 +169,7 @@ you can allow create and manage subfolders on your media manager on `/app/Provid
 
 ```php
 ->plugin(
-    \TomatoPHP\FilamentMediaManager\FilamentMediaManagerPlugin::make()
+    \Juniyasyos\FilamentMediaManager\FilamentMediaManagerPlugin::make()
         ->allowSubFolders()
 )
 ```
@@ -180,7 +180,7 @@ now you can allow user to access selected folder and restract user to access eac
 
 ```php
 ->plugin(
-    \TomatoPHP\FilamentMediaManager\FilamentMediaManagerPlugin::make()
+    \Juniyasyos\FilamentMediaManager\FilamentMediaManagerPlugin::make()
         ->allowUserAccess()
 )
 ```
@@ -245,7 +245,3 @@ you can publish migrations file by use this command
 ```bash
 php artisan vendor:publish --tag="filament-media-manager-migrations"
 ```
-
-## Other Filament Packages
-
-Checkout our [Awesome TomatoPHP](https://github.com/tomatophp/awesome)
