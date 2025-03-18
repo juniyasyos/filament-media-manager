@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace Juniyasyos\FilamentMediaManager\Resources;
 
-use App\Traits\HasActiveIcon;
+use Juniyasyos\FilamentMediaManager\Traits\HasActiveIcon;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Resources\Resource;
 

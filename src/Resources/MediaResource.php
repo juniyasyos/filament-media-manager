@@ -2,22 +2,21 @@
 
 namespace Juniyasyos\FilamentMediaManager\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use Filament\Facades\Filament;
+use Illuminate\Database\Eloquent\Builder;
+use Juniyasyos\FilamentMediaManager\Models\Media;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Juniyasyos\FilamentMediaManager\Resources\BaseResource;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\RelationManagers;
-use Juniyasyos\FilamentMediaManager\Models\Media;
-use Filament\Forms;
-use Filament\Forms\Form;
-use App\Filament\Resources\BaseResource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class MediaResource extends BaseResource
 {
-
     protected static bool $isScopedToTenant = false;
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

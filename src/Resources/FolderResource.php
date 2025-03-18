@@ -4,12 +4,12 @@ namespace Juniyasyos\FilamentMediaManager\Resources;
 
 use Illuminate\Support\Str;
 use TomatoPHP\FilamentIcons\Components\IconPicker;
+use Juniyasyos\FilamentMediaManager\Resources\BaseResource;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\RelationManagers;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Filament\Forms;
 use Filament\Forms\Form;
-use App\Filament\Resources\BaseResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FolderResource extends BaseResource
 {
-
     protected static bool $isScopedToTenant = false;
 
 
