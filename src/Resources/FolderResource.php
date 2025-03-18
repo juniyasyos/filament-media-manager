@@ -2,21 +2,31 @@
 
 namespace Juniyasyos\FilamentMediaManager\Resources;
 
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use Juniyasyos\FilamentMediaManager\Models\Folder;
 use TomatoPHP\FilamentIcons\Components\IconPicker;
-use Juniyasyos\FilamentMediaManager\Resources\BaseResource;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\RelationManagers;
-use Juniyasyos\FilamentMediaManager\Models\Folder;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class FolderResource extends BaseResource
+class FolderResource extends Resource implements HasShieldPermissions
 {
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+        ];
+    }
     protected static bool $isScopedToTenant = false;
 
 
@@ -35,13 +45,11 @@ class FolderResource extends BaseResource
 
     public static function getPluralLabel(): ?string
     {
-        if(request()->has('model_type') && !request()->has('collection')){
+        if (request()->has('model_type') && !request()->has('collection')) {
             return str(request()->get('model_type'))->afterLast('\\')->title();
-        }
-        else if(request()->has('model_type') && request()->has('collection')){
+        } else if (request()->has('model_type') && request()->has('collection')) {
             return str(request()->get('collection'))->title();
-        }
-        else {
+        } else {
             return trans('filament-media-manager::messages.folders.title');
         }
     }
@@ -110,17 +118,15 @@ class FolderResource extends BaseResource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                if(request()->has('model_type') && !request()->has('collection')){
+                if (request()->has('model_type') && !request()->has('collection')) {
                     $query->where('model_type', request()->get('model_type'))
                         ->where('model_id', null)
                         ->whereNotNull('collection');
-                }
-                else if(request()->has('model_type') && request()->has('collection')){
+                } else if (request()->has('model_type') && request()->has('collection')) {
                     $query->where('model_type', request()->get('model_type'))
                         ->whereNotNull('model_id')
                         ->where('collection', request()->get('collection'));
-                }
-                else {
+                } else {
                     $query->where('model_id', null)
                         ->where('collection', null)->orWhere('model_type', null);
                 }

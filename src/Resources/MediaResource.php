@@ -7,17 +7,27 @@ use Filament\Tables;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Facades\Filament;
+use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Media;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Juniyasyos\FilamentMediaManager\Resources\BaseResource;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\RelationManagers;
 
-class MediaResource extends BaseResource
+class MediaResource extends Resource implements HasShieldPermissions
 {
-    protected static bool $isScopedToTenant = false;
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+        ];
+    }
+    
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
@@ -54,14 +64,14 @@ class MediaResource extends BaseResource
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                if(request()->has('folder_id') && !empty('folder_id')){
+                if (request()->has('folder_id') && !empty('folder_id')) {
                     $folder = Folder::find(request()->get('folder_id'));
-                    if($folder){
+                    if ($folder) {
                         $query->where('collection_name', $folder->collection);
                     }
                 }
             })
-            ->emptyState(fn()=>view('filament-media-manager::pages.media'))
+            ->emptyState(fn() => view('filament-media-manager::pages.media'))
             ->content(function () {
                 return view('filament-media-manager::pages.media');
             })
