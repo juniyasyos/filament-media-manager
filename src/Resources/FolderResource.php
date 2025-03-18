@@ -9,13 +9,13 @@ use Juniyasyos\FilamentMediaManager\Resources\FolderResource\RelationManagers;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Filament\Resources\BaseResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class FolderResource extends Resource
+class FolderResource extends BaseResource
 {
 
     protected static bool $isScopedToTenant = false;

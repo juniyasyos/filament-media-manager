@@ -9,13 +9,13 @@ use Juniyasyos\FilamentMediaManager\Resources\MediaResource\RelationManagers;
 use Juniyasyos\FilamentMediaManager\Models\Media;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use App\Filament\Resources\BaseResource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class MediaResource extends Resource
+class MediaResource extends BaseResource
 {
 
     protected static bool $isScopedToTenant = false;
