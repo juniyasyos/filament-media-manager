@@ -110,6 +110,7 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->password()
                     ->required()
                     ->revealable()
+                    ->same('password')
                     ->maxLength(255)
             ])->columns(2);
     }
