@@ -26,15 +26,20 @@ return [
         'title' => 'Media',
         'single' => 'Media',
         'columns' => [
-            'image' => 'Image',
-            'model' => 'Model',
+            'name' => 'Name',
+            'file_name' => 'File Name',
+            'mime_type' => 'MIME Type',
+            'disk' => 'Disk',
+            'conversions_disk' => 'Conversions Disk',
             'collection_name' => 'Collection Name',
             'size' => 'Size',
-            'order_column' => 'Order Column',
+            'order_column' => 'Order',
+            'image' => 'Image',
+            'model' => 'Model',
         ],
         'actions' => [
-            'sub_folder'=> [
-              'label' => "Create Sub Folder"
+            'sub_folder' => [
+                'label' => "Create Sub Folder"
             ],
             'create' => [
                 'label' => 'Add Media',

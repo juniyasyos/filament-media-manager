@@ -20,7 +20,21 @@ return [
         ]
     ],
 
-    "user" => [
-      'column_name' => 'name', // Change the value if your field in users table is different from "name"
+    "filament" => [
+        "active" => true,
+        "resources" => [
+            \Juniyasyos\FilamentMediaManager\Resources\FolderResource::class,
+            \Juniyasyos\FilamentMediaManager\Resources\MediaResource::class,
+        ]
     ],
+
+    "user" => [
+        'column_name' => 'name',
+    ],
+
+    'allow_user_access' => true,
+
+    'slug_folder' => 'folder',
+
+    "navigation_sort" => 0,
 ];
