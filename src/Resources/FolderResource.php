@@ -141,35 +141,35 @@ class FolderResource extends Resource implements HasShieldPermissions
             })
             ->content(fn() => view('filament-media-manager::pages.folders'))
             ->columns([
-                Tables\Columns\Layout\Stack::make([
-                    Tables\Columns\TextColumn::make('name')
-                        ->label(trans('filament-media-manager::messages.folders.columns.name'))
-                        ->sortable()
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('description')
-                        ->label(trans('filament-media-manager::messages.folders.columns.description'))
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('icon')
-                        ->label(trans('filament-media-manager::messages.folders.columns.icon'))
-                        ->sortable()
-                        ->searchable(),
-                    Tables\Columns\TextColumn::make('color')
-                        ->label(trans('filament-media-manager::messages.folders.columns.color'))
-                        ->sortable()
-                        ->searchable(),
-                    Tables\Columns\IconColumn::make('is_protected')
-                        ->label(trans('filament-media-manager::messages.folders.columns.is_protected'))
-                        ->sortable()
-                        ->boolean(),
-                    Tables\Columns\TextColumn::make('created_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                    Tables\Columns\TextColumn::make('updated_at')
-                        ->dateTime()
-                        ->sortable()
-                        ->toggleable(isToggledHiddenByDefault: true),
-                ])
+                // Tables\Columns\Layout\Stack::make([
+                Tables\Columns\TextColumn::make('name')
+                    ->label(trans('filament-media-manager::messages.folders.columns.name'))
+                    ->sortable()
+                    ->searchable(),
+                // Tables\Columns\TextColumn::make('description')
+                //     ->label(trans('filament-media-manager::messages.folders.columns.description'))
+                //     ->searchable(),
+                // Tables\Columns\TextColumn::make('icon')
+                //     ->label(trans('filament-media-manager::messages.folders.columns.icon'))
+                //     ->sortable()
+                //     ->searchable(),
+                // Tables\Columns\TextColumn::make('color')
+                //     ->label(trans('filament-media-manager::messages.folders.columns.color'))
+                //     ->sortable()
+                //     ->searchable(),
+                // Tables\Columns\IconColumn::make('is_protected')
+                //     ->label(trans('filament-media-manager::messages.folders.columns.is_protected'))
+                //     ->sortable()
+                //     ->boolean(),
+                // Tables\Columns\TextColumn::make('created_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // Tables\Columns\TextColumn::make('updated_at')
+                //     ->dateTime()
+                //     ->sortable()
+                //     ->toggleable(isToggledHiddenByDefault: true),
+                // ])
             ])
             ->defaultPaginationPageOption(12)
             ->paginationPageOptions([
@@ -201,7 +201,8 @@ class FolderResource extends Resource implements HasShieldPermissions
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListFolders::route('/')
+            'index' => Pages\ListFolders::route('/'),
+            'media' => \Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages\ListMedia::route('/media-name={folderName}'),
         ];
     }
 }

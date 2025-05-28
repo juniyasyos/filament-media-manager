@@ -8,18 +8,23 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Support\Htmlable;
 use Filament\Resources\Pages\ManageRecords;
+use Juniyasyos\FilamentMediaManager\Http\Resources\FolderResource;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Juniyasyos\FilamentMediaManager\Models\Media;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource;
-use Juniyasyos\FilamentMediaManager\Resources\Actions\CreateMediaAction;
-use Juniyasyos\FilamentMediaManager\Resources\Actions\CreateSubFolderAction;
-use Juniyasyos\FilamentMediaManager\Resources\Actions\DeleteFolderAction;
-use Juniyasyos\FilamentMediaManager\Resources\Actions\EditCurrentFolderAction;
+use Juniyasyos\FilamentMediaManager\Resources\FolderResource as FolderResourceFilament;
+use Juniyasyos\FilamentMediaManager\Resources\Actions\{
+    CreateMediaAction,
+    CreateSubFolderAction,
+    DeleteFolderAction,
+    EditCurrentFolderAction
+};
 
 class ListMedia extends ManageRecords
 {
     protected static string $resource = MediaResource::class;
 
+    public ?string $folderName = null;
     public ?int $folder_id = null;
     public ?Folder $folder = null;
 
@@ -27,23 +32,41 @@ class ListMedia extends ManageRecords
     {
         parent::mount();
 
-        $this->folder_id = request()->get('folder_id');
+        $this->folderName = request()->route('folderName');
+        $this->loadFolder();
+        $this->validateFolderAccess();
+        session()->put('folder_id', $this->folder->id);
+    }
 
-        if (!$this->folder_id) {
-            abort(404, 'Folder ID is required');
+    public function getBreadcrumbs(): array
+    {
+        return [
+            url('/') => 'Dashboard',
+            FolderResourceFilament::getUrl('index') => 'folders',
+            // 'folders',
+            null => $this->folderName ?? null
+        ];
+    }
+
+    protected function loadFolder(): void
+    {
+        if (!$this->folderName) {
+            abort(404, 'Folder name is required');
         }
 
-        $this->folder = Folder::find($this->folder_id);
+        $this->folder = Folder::where('name', $this->folderName)->first();
+        $this->folder_id = $this->folder->id;
 
         if (!$this->folder) {
             abort(404, 'Folder not found');
         }
+    }
 
+    protected function validateFolderAccess(): void
+    {
         if ($this->folder->is_protected && !session()->has('folder_password')) {
             abort(403, 'Access to this folder is restricted');
         }
-
-        session()->put('folder_id', $this->folder_id);
     }
 
     public function getTitle(): string|Htmlable
@@ -53,21 +76,21 @@ class ListMedia extends ManageRecords
 
     protected function getHeaderActions(): array
     {
-        $folder = config('filament-media-manager.model.folder')::find($this->folder_id);
+        $folder = $this->folder;
 
-        $isOwner = filament(config('filament-media-manager.allow_user_access', false))
+        $isOwner = config('filament-media-manager.allow_user_access', false)
             && !empty($folder->user_id)
-            && $folder->user_id === Auth::user()->id()
+            && $folder->user_id === Auth::id()
             && $folder->user_type === get_class(Auth::user());
 
-        return $isOwner || !filament(config('filament-media-manager.allow_user_access', false))
-            ? [
-                CreateMediaAction::make($this->folder_id),
-                CreateSubFolderAction::make($this->folder_id),
-                DeleteFolderAction::make($this->folder_id),
-                EditCurrentFolderAction::make($this->folder_id),
-            ]
-            : [];
+        $isAllowed = $isOwner || !filament(config('filament-media-manager.allow_user_access', false));
+
+        return $isAllowed ? [
+            CreateMediaAction::make($folder->id),
+            CreateSubFolderAction::make($folder->id),
+            DeleteFolderAction::make($folder->id),
+            EditCurrentFolderAction::make($folder->id),
+        ] : [];
     }
 
     public function folderAction(?Folder $item = null): Actions\Action
@@ -79,50 +102,60 @@ class ListMedia extends ManageRecords
             ->view('filament-media-manager::pages.folder-action', ['item' => $item]);
     }
 
-
     protected function getPasswordForm(array $record): ?array
     {
-        return $record['is_protected'] ? [
-            TextInput::make('password')
-                ->password()
-                ->revealable()
-                ->required()
-                ->maxLength(255),
-        ] : null;
+        return $record['is_protected']
+            ? [
+                TextInput::make('password')
+                    ->password()
+                    ->revealable()
+                    ->required()
+                    ->maxLength(255),
+            ]
+            : null;
     }
 
     protected function handleFolderRedirect(array $record, array $data)
     {
         if ($record['is_protected'] && ($record['password'] !== ($data['password'] ?? null))) {
-            Notification::make()
-                ->title('Password is incorrect')
-                ->danger()
-                ->send();
-            return;
+            return $this->notifyWrongPassword();
         }
 
         if ($record['is_protected']) {
             session()->put('folder_password', $data['password']);
         }
 
+        return $this->redirectBasedOnRecord($record);
+    }
+
+    protected function notifyWrongPassword()
+    {
+        Notification::make()
+            ->title('Password is incorrect')
+            ->danger()
+            ->send();
+
+        return null;
+    }
+
+    protected function redirectBasedOnRecord(array $record)
+    {
         $panel = filament()->getCurrentPanel()->getId();
-        $tenant = filament()->getTenant()?->id;
-        $params = ['folder_id' => $record['id']];
         $routePrefix = "filament.$panel.resources";
 
         if (!$record['model_type']) {
-            return redirect()->route("$routePrefix.media.index", $params);
+            return redirect()->route("$routePrefix.media.index", ['folder_id' => $record['id']]);
         }
 
         if (!$record['model_id']) {
-            $folderParams = ['model_type' => $record['model_type']];
+            $params = ['model_type' => $record['model_type']];
             if (!empty($record['collection'])) {
-                $folderParams['collection'] = $record['collection'];
+                $params['collection'] = $record['collection'];
             }
-            return redirect()->route("$routePrefix.folders.index", $folderParams);
+            return redirect()->route("$routePrefix.folders.index", $params);
         }
 
-        return redirect()->route("$routePrefix.media.index", $params);
+        return redirect()->route("$routePrefix.media.index", ['folder_id' => $record['id']]);
     }
 
     public function deleteMedia(): Actions\Action
@@ -132,16 +165,22 @@ class ListMedia extends ManageRecords
             ->icon('heroicon-s-trash')
             ->color('danger')
             ->requiresConfirmation()
-            ->action(function (array $arguments) {
-                $media = Media::find($arguments['record']['id']);
+            ->action(fn(array $arguments) => $this->handleDeleteMedia($arguments['record']['id'] ?? null));
+    }
 
-                if ($media) {
-                    $media->delete();
-                    Notification::make()
-                        ->title(trans('filament-media-manager::messages.media.notifications.delete-folder'))
-                        ->success()
-                        ->send();
-                }
-            });
+    protected function handleDeleteMedia(?int $id): void
+    {
+        if (!$id) return;
+
+        $media = Media::find($id);
+
+        if ($media) {
+            $media->delete();
+
+            Notification::make()
+                ->title(trans('filament-media-manager::messages.media.notifications.delete-folder'))
+                ->success()
+                ->send();
+        }
     }
 }
