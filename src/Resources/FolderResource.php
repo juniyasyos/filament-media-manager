@@ -89,6 +89,7 @@ class FolderResource extends Resource implements HasShieldPermissions
                 Forms\Components\TextInput::make('collection')
                     ->label(trans('filament-media-manager::messages.folders.columns.collection'))
                     ->columnSpanFull()
+                    ->readOnly()
                     ->unique()
                     ->required()
                     ->maxLength(255),
@@ -138,6 +139,8 @@ class FolderResource extends Resource implements HasShieldPermissions
                     $query->where('model_id', null)
                         ->where('collection', null)->orWhere('model_type', null);
                 }
+
+                // dd($query->get());
             })
             ->content(fn() => view('filament-media-manager::pages.folders'))
             ->columns([

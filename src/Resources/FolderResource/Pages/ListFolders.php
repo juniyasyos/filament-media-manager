@@ -3,6 +3,7 @@
 namespace Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 
 use Filament\Actions;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
@@ -16,7 +17,7 @@ class ListFolders extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
         ];
     }
 
