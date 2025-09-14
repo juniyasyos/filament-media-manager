@@ -47,6 +47,34 @@ class MediaResource extends Resource implements HasShieldPermissions
         return trans('filament-media-manager::messages.media.single');
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return config('filament-media-manager.navigation.media.label')
+            ?? trans('filament-media-manager::messages.media.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return config('filament-media-manager.navigation.group')
+            ?? trans('filament-media-manager::messages.folders.group');
+    }
+
+    public static function getNavigationIcon(): ?string
+    {
+        return config('filament-media-manager.navigation.media.icon', 'heroicon-o-photo');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) config('filament-media-manager.navigation.media.register', false);
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return config('filament-media-manager.navigation.media.sort')
+            ?? config('filament-media-manager.navigation_sort', 0);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return MediaForm::schema($schema);

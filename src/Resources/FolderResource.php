@@ -43,7 +43,8 @@ class FolderResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationLabel(): string
     {
-        return trans('filament-media-manager::messages.folders.title');
+        return config('filament-media-manager.navigation.folders.label')
+            ?? trans('filament-media-manager::messages.folders.title');
     }
 
     public static function getPluralLabel(): ?string
@@ -64,7 +65,24 @@ class FolderResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationGroup(): ?string
     {
-        return trans('filament-media-manager::messages.folders.group');
+        return config('filament-media-manager.navigation.group')
+            ?? trans('filament-media-manager::messages.folders.group');
+    }
+
+    public static function getNavigationIcon(): ?string
+    {
+        return config('filament-media-manager.navigation.folders.icon', 'heroicon-o-folder');
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return (bool) config('filament-media-manager.navigation.folders.register', true);
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return config('filament-media-manager.navigation.folders.sort')
+            ?? config('filament-media-manager.navigation_sort', 0);
     }
 
     public static function form(Schema $schema): Schema

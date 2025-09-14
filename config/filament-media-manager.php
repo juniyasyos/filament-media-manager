@@ -36,5 +36,27 @@ return [
 
     'slug_folder' => 'folder',
 
-    "navigation_sort" => 0,
+    "navigation_sort" => 0, // Backward-compat default sort
+
+    // Filament navigation control
+    'navigation' => [
+        // Global group name for all resources
+        'group' => null, // e.g. 'Media Manager' (null = use translations)
+
+        // FolderResource navigation settings
+        'folders' => [
+            'register' => true,
+            'label' => null, // e.g. 'Folders' (null = use translations)
+            'icon' => 'heroicon-o-folder',
+            'sort' => null, // null = fallback to `navigation_sort`
+        ],
+
+        // MediaResource navigation settings
+        'media' => [
+            'register' => false,
+            'label' => null, // e.g. 'Media' (null = use translations)
+            'icon' => 'heroicon-o-photo',
+            'sort' => null, // null = fallback to `navigation_sort`
+        ],
+    ],
 ];
