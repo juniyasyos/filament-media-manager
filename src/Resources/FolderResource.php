@@ -4,14 +4,13 @@ namespace Juniyasyos\FilamentMediaManager\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
-use TomatoPHP\FilamentIcons\Components\IconPicker;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
@@ -31,7 +30,7 @@ class FolderResource extends Resource implements HasShieldPermissions
     protected static bool $isScopedToTenant = false;
 
 
-    protected static ?string $navigationIcon = 'heroicon-o-folder';
+    // protected static ?string $navigationIcon = 'heroicon-o-folder';
 
 
     public static function getModel(): string
@@ -65,10 +64,10 @@ class FolderResource extends Resource implements HasShieldPermissions
         return trans('filament-media-manager::messages.folders.group');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Forms\Components\Hidden::make('user_id')
                     ->visible(config('filament-media-manager.allow_user_access', false))
                     ->default(Auth::id()),
@@ -81,7 +80,7 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->label(trans('filament-media-manager::messages.folders.columns.name'))
                     ->columnSpanFull()
                     ->lazy()
-                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                    ->afterStateUpdated(function ($set, $get) {
                         $set('collection', Str::slug($get('name')));
                     })
                     ->required()
@@ -97,8 +96,10 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->label(trans('filament-media-manager::messages.folders.columns.description'))
                     ->columnSpanFull()
                     ->maxLength(255),
-                IconPicker::make('icon')
-                    ->label(trans('filament-media-manager::messages.folders.columns.icon')),
+                Forms\Components\TextInput::make('icon')
+                    ->label(trans('filament-media-manager::messages.folders.columns.icon'))
+                    ->placeholder('heroicon-o-folder')
+                    ->maxLength(255),
                 Forms\Components\ColorPicker::make('color')
                     ->label(trans('filament-media-manager::messages.folders.columns.color')),
                 Forms\Components\Toggle::make('is_protected')
@@ -107,14 +108,14 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('password')
                     ->label(trans('filament-media-manager::messages.folders.columns.password'))
-                    ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                    ->hidden(fn($get) => !$get('is_protected'))
                     ->password()
                     ->revealable()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password_confirmation')
                     ->label(trans('filament-media-manager::messages.folders.columns.password_confirmation'))
-                    ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                    ->hidden(fn($get) => !$get('is_protected'))
                     ->password()
                     ->required()
                     ->revealable()
@@ -185,12 +186,12 @@ class FolderResource extends Resource implements HasShieldPermissions
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 

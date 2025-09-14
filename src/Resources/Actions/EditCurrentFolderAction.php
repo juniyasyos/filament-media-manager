@@ -6,7 +6,6 @@ use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Notifications\Notification;
-use TomatoPHP\FilamentIcons\Components\IconPicker;
 
 class EditCurrentFolderAction
 {
@@ -40,8 +39,10 @@ class EditCurrentFolderAction
                                 ->label(trans('filament-media-manager::messages.folders.columns.description'))
                                 ->columnSpanFull()
                                 ->maxLength(255),
-                            IconPicker::make('icon')
-                                ->label(trans('filament-media-manager::messages.folders.columns.icon')),
+                            Forms\Components\TextInput::make('icon')
+                                ->label(trans('filament-media-manager::messages.folders.columns.icon'))
+                                ->placeholder('heroicon-o-folder')
+                                ->maxLength(255),
                             Forms\Components\ColorPicker::make('color')
                                 ->label(trans('filament-media-manager::messages.folders.columns.color')),
                             Forms\Components\Toggle::make('is_protected')
@@ -50,7 +51,7 @@ class EditCurrentFolderAction
                                 ->columnSpanFull(),
                             Forms\Components\TextInput::make('password')
                                 ->label(trans('filament-media-manager::messages.folders.columns.password'))
-                                ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                                ->hidden(fn($get) => !$get('is_protected'))
                                 ->confirmed()
                                 ->password()
                                 ->revealable()
@@ -58,7 +59,7 @@ class EditCurrentFolderAction
                                 ->maxLength(255),
                             Forms\Components\TextInput::make('password_confirmation')
                                 ->label(trans('filament-media-manager::messages.folders.columns.password_confirmation'))
-                                ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                                ->hidden(fn($get) => !$get('is_protected'))
                                 ->password()
                                 ->required()
                                 ->revealable()
@@ -70,14 +71,14 @@ class EditCurrentFolderAction
                                 ->columnSpanFull(),
                             Forms\Components\Toggle::make('has_user_access')
                                 ->visible(filament('filament-media-manager')->allowUserAccess)
-                                ->hidden(fn(Forms\Get $get) => $get('is_public'))
+                                ->hidden(fn($get) => $get('is_public'))
                                 ->label(trans('filament-media-manager::messages.folders.columns.has_user_access'))
                                 ->live()
                                 ->columnSpanFull(),
                             Forms\Components\Select::make('users')
                                 ->required()
                                 ->visible(filament('filament-media-manager')->allowUserAccess)
-                                ->hidden(fn(Forms\Get $get) => !$get('has_user_access'))
+                                ->hidden(fn($get) => !$get('has_user_access'))
                                 ->label(trans('filament-media-manager::messages.folders.columns.users'))
                                 ->searchable()
                                 ->multiple()

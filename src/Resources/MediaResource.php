@@ -4,7 +4,7 @@ namespace Juniyasyos\FilamentMediaManager\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
@@ -28,8 +28,6 @@ class MediaResource extends Resource implements HasShieldPermissions
         ];
     }
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
     protected static bool $shouldRegisterNavigation = false;
 
     public static function getModel(): string
@@ -47,9 +45,9 @@ class MediaResource extends Resource implements HasShieldPermissions
         return trans('filament-media-manager::messages.media.single');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form;
+        return $schema;
     }
 
     public static function table(Table $table): Table

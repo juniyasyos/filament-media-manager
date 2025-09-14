@@ -3,7 +3,6 @@
 namespace Juniyasyos\FilamentMediaManager\Resources\Actions;
 
 use Illuminate\Support\Str;
-use TomatoPHP\FilamentIcons\Components\IconPicker;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Filament\Actions;
 use Filament\Forms;
@@ -28,7 +27,7 @@ class CreateSubFolderAction
                     ->label(trans('filament-media-manager::messages.folders.columns.name'))
                     ->columnSpanFull()
                     ->lazy()
-                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                    ->afterStateUpdated(function ($set, $get) {
                         $set('collection', Str::slug($get('name')));
                     })
                     ->required()
@@ -43,8 +42,10 @@ class CreateSubFolderAction
                     ->label(trans('filament-media-manager::messages.folders.columns.description'))
                     ->columnSpanFull()
                     ->maxLength(255),
-                IconPicker::make('icon')
-                    ->label(trans('filament-media-manager::messages.folders.columns.icon')),
+                Forms\Components\TextInput::make('icon')
+                    ->label(trans('filament-media-manager::messages.folders.columns.icon'))
+                    ->placeholder('heroicon-o-folder')
+                    ->maxLength(255),
                 Forms\Components\ColorPicker::make('color')
                     ->label(trans('filament-media-manager::messages.folders.columns.color')),
                 Forms\Components\Toggle::make('is_protected')
@@ -53,14 +54,14 @@ class CreateSubFolderAction
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('password')
                     ->label(trans('filament-media-manager::messages.folders.columns.password'))
-                    ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                    ->hidden(fn($get) => !$get('is_protected'))
                     ->password()
                     ->revealable()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password_confirmation')
                     ->label(trans('filament-media-manager::messages.folders.columns.password_confirmation'))
-                    ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                    ->hidden(fn($get) => !$get('is_protected'))
                     ->password()
                     ->required()
                     ->revealable()

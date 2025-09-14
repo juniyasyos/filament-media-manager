@@ -243,9 +243,9 @@
                     class="fi-ta-empty-state-icon h-6 w-6 text-gray-500 dark:text-gray-400" />
             </div>
 
-            <x-filament-tables::empty-state.heading>
+            <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 {{ trans('filament-media-manager::messages.empty.title') }}
-            </x-filament-tables::empty-state.heading>
+            </h2>
         </div>
     </div>
 @endif
