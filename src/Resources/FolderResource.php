@@ -2,6 +2,7 @@
 
 namespace Juniyasyos\FilamentMediaManager\Resources;
 
+use BackedEnum;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Schemas\Schema;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\RelationManagers;
+use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Schemas\FolderForm;
+use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Tables\FoldersTable;
 
 class FolderResource extends Resource implements HasShieldPermissions
 {
@@ -29,9 +32,9 @@ class FolderResource extends Resource implements HasShieldPermissions
     }
     protected static bool $isScopedToTenant = false;
 
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-folder';
 
-    // protected static ?string $navigationIcon = 'heroicon-o-folder';
-
+    protected static string | BackedEnum | null $activeNavigationIcon = 'heroicon-c-folder';
 
     public static function getModel(): string
     {
@@ -66,133 +69,12 @@ class FolderResource extends Resource implements HasShieldPermissions
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                Forms\Components\Hidden::make('user_id')
-                    ->visible(config('filament-media-manager.allow_user_access', false))
-                    ->default(Auth::id()),
-
-                Forms\Components\Hidden::make('user_type')
-                    ->visible(config('filament-media-manager.allow_user_access', false))
-                    ->default(get_class(Auth::user())),
-
-                Forms\Components\TextInput::make('name')
-                    ->label(trans('filament-media-manager::messages.folders.columns.name'))
-                    ->columnSpanFull()
-                    ->lazy()
-                    ->afterStateUpdated(function ($set, $get) {
-                        $set('collection', Str::slug($get('name')));
-                    })
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('collection')
-                    ->label(trans('filament-media-manager::messages.folders.columns.collection'))
-                    ->columnSpanFull()
-                    ->readOnly()
-                    ->unique()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->label(trans('filament-media-manager::messages.folders.columns.description'))
-                    ->columnSpanFull()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('icon')
-                    ->label(trans('filament-media-manager::messages.folders.columns.icon'))
-                    ->placeholder('heroicon-o-folder')
-                    ->maxLength(255),
-                Forms\Components\ColorPicker::make('color')
-                    ->label(trans('filament-media-manager::messages.folders.columns.color')),
-                Forms\Components\Toggle::make('is_protected')
-                    ->label(trans('filament-media-manager::messages.folders.columns.is_protected'))
-                    ->live()
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('password')
-                    ->label(trans('filament-media-manager::messages.folders.columns.password'))
-                    ->hidden(fn($get) => !$get('is_protected'))
-                    ->password()
-                    ->revealable()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('password_confirmation')
-                    ->label(trans('filament-media-manager::messages.folders.columns.password_confirmation'))
-                    ->hidden(fn($get) => !$get('is_protected'))
-                    ->password()
-                    ->required()
-                    ->revealable()
-                    ->same('password')
-                    ->maxLength(255)
-            ])->columns(2);
+        return FolderForm::schema($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                if (request()->has('model_type') && !request()->has('collection')) {
-                    $query->where('model_type', request()->get('model_type'))
-                        ->where('model_id', null)
-                        ->whereNotNull('collection');
-                } else if (request()->has('model_type') && request()->has('collection')) {
-                    $query->where('model_type', request()->get('model_type'))
-                        ->whereNotNull('model_id')
-                        ->where('collection', request()->get('collection'));
-                } else {
-                    $query->where('model_id', null)
-                        ->where('collection', null)->orWhere('model_type', null);
-                }
-
-                // dd($query->get());
-            })
-            ->content(fn() => view('filament-media-manager::pages.folders'))
-            ->columns([
-                // Tables\Columns\Layout\Stack::make([
-                Tables\Columns\TextColumn::make('name')
-                    ->label(trans('filament-media-manager::messages.folders.columns.name'))
-                    ->sortable()
-                    ->searchable(),
-                // Tables\Columns\TextColumn::make('description')
-                //     ->label(trans('filament-media-manager::messages.folders.columns.description'))
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('icon')
-                //     ->label(trans('filament-media-manager::messages.folders.columns.icon'))
-                //     ->sortable()
-                //     ->searchable(),
-                // Tables\Columns\TextColumn::make('color')
-                //     ->label(trans('filament-media-manager::messages.folders.columns.color'))
-                //     ->sortable()
-                //     ->searchable(),
-                // Tables\Columns\IconColumn::make('is_protected')
-                //     ->label(trans('filament-media-manager::messages.folders.columns.is_protected'))
-                //     ->sortable()
-                //     ->boolean(),
-                // Tables\Columns\TextColumn::make('created_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                // Tables\Columns\TextColumn::make('updated_at')
-                //     ->dateTime()
-                //     ->sortable()
-                //     ->toggleable(isToggledHiddenByDefault: true),
-                // ])
-            ])
-            ->defaultPaginationPageOption(12)
-            ->paginationPageOptions([
-                "12",
-                "24",
-                "48",
-                "96",
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                // Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                // Tables\Actions\BulkActionGroup::make([
-                //     Tables\Actions\DeleteBulkAction::make(),
-                // ]),
-            ]);
+        return FoldersTable::table($table);
     }
 
     public static function getRelations(): array
