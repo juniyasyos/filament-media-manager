@@ -8,7 +8,7 @@
 
 @if ($url && ! $shouldPostToUrl)
     <a href="{{ $url }}" @if($alpineClick) x-on:click="{{ $alpineClick }}" @endif target="{{ method_exists($action,'shouldOpenUrlInNewTab') && $action->shouldOpenUrlInNewTab() ? '_blank' : null }}"
-       class="fi-ac-btn-action inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold outline-none transition focus-visible:ring-2 disabled:opacity-70"
+       class="block w-full h-full border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800"
        @if($isDisabled) aria-disabled="true" @endif>
         @include('filament-media-manager::pages.partials.folder-card', ['item' => $item])
     </a>
@@ -17,35 +17,7 @@
             @if($wireClick) wire:click="{{ $wireClick }}" @endif
             @if($alpineClick) x-on:click="{{ $alpineClick }}" @endif
             @if($isDisabled) disabled @endif
-            class="fi-ac-btn-action inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold outline-none transition focus-visible:ring-2 disabled:opacity-70">
+            class="block w-full h-full border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800">
         @include('filament-media-manager::pages.partials.folder-card', ['item' => $item])
     </button>
 @endif
-
-@once
-    @push('styles')
-        <style>
-            .folder-icon-{{ $item->id }} {
-                width: 100px;
-                height: 70px;
-                background-color: {{ $item->color ?? '#f3c623' }};
-                border-radius: 5px;
-                position: relative;
-                margin: 20px 10px 10px 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-
-            .folder-icon-{{ $item->id }}::before {
-                content: "";
-                width: 40px;
-                height: 10px;
-                background-color: {{ $item->color ?? '#f3c623' }};
-                border-radius: 5px 5px 0 0;
-                position: absolute;
-                top: -10px;
-                left: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-        </style>
-    @endpush
-@endonce

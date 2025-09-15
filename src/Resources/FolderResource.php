@@ -13,21 +13,23 @@ use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\RelationManagers;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Schemas\FolderForm;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Tables\FoldersTable;
+use juniyasyos\ShieldLite\HasShieldLite;
 
-class FolderResource extends Resource implements HasShieldPermissions
+class FolderResource extends Resource
 {
-    public static function getPermissionPrefixes(): array
+    use HasShieldLite;
+
+    public function defineGates(): array
     {
         return [
-            'view',
-            'view_any',
-            'create',
-            'update',
+            'folder.index' => __('Allows viewing folders'),
+            'folder.create' => __('Allows creating folders'),
+            'folder.update' => __('Allows updating folders'),
+            'folder.delete' => __('Allows deleting folders'),
         ];
     }
     protected static bool $isScopedToTenant = false;
@@ -39,6 +41,26 @@ class FolderResource extends Resource implements HasShieldPermissions
     public static function getModel(): string
     {
         return config('filament-media-manager.model.folder');
+    }
+
+    public static function canAccess(): bool
+    {
+        return hexa()->can('folder.index');
+    }
+
+    public static function canCreate(): bool
+    {
+        return hexa()->can('folder.create');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return hexa()->can('folder.update');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return hexa()->can('folder.delete');
     }
 
     public static function getNavigationLabel(): string
@@ -65,8 +87,14 @@ class FolderResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationGroup(): ?string
     {
-        return config('filament-media-manager.navigation.group')
-            ?? trans('filament-media-manager::messages.folders.group');
+        $group = config('filament-media-manager.navigation.group');
+
+        // Treat empty string as no group (null) and avoid fallback to translations.
+        if (is_string($group) && trim($group) === '') {
+            return null;
+        }
+
+        return $group; // May be string or null (no group)
     }
 
     public static function getNavigationIcon(): ?string

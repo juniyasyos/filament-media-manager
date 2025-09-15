@@ -12,21 +12,23 @@ use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Media;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\RelationManagers;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\Schemas\MediaForm;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\Tables\MediaTable as MediaTableBuilder;
+use juniyasyos\ShieldLite\HasShieldLite;
 
-class MediaResource extends Resource implements HasShieldPermissions
+class MediaResource extends Resource
 {
-    public static function getPermissionPrefixes(): array
+    use HasShieldLite;
+
+    public function defineGates(): array
     {
         return [
-            'view',
-            'view_any',
-            'create',
-            'update',
+            'media.index' => __('Allows viewing media items'),
+            'media.create' => __('Allows creating media'),
+            'media.update' => __('Allows updating media'),
+            'media.delete' => __('Allows deleting media'),
         ];
     }
 
@@ -35,6 +37,11 @@ class MediaResource extends Resource implements HasShieldPermissions
     public static function getModel(): string
     {
         return config('filament-media-manager.model.media');
+    }
+
+    public static function canAccess(): bool
+    {
+        return hexa()->can('media.index');
     }
 
     public static function getPluralLabel(): ?string
@@ -55,8 +62,14 @@ class MediaResource extends Resource implements HasShieldPermissions
 
     public static function getNavigationGroup(): ?string
     {
-        return config('filament-media-manager.navigation.group')
-            ?? trans('filament-media-manager::messages.folders.group');
+        $group = config('filament-media-manager.navigation.group');
+
+        // Treat empty string as no group (null) and avoid fallback to translations.
+        if (is_string($group) && trim($group) === '') {
+            return null;
+        }
+
+        return $group; // May be string or null (no group)
     }
 
     public static function getNavigationIcon(): ?string

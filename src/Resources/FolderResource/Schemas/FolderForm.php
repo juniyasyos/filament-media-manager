@@ -2,10 +2,16 @@
 
 namespace Juniyasyos\FilamentMediaManager\Resources\FolderResource\Schemas;
 
-use Filament\Forms;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Juniyasyos\FilamentMediaManager\Models\Folder;
 
 class FolderForm
 {
@@ -13,60 +19,84 @@ class FolderForm
     {
         return $schema
             ->components([
-                Forms\Components\Hidden::make('user_id')
+                // Hidden fields for user access
+                Hidden::make('user_id')
                     ->visible(config('filament-media-manager.allow_user_access', false))
                     ->default(Auth::id()),
 
-                Forms\Components\Hidden::make('user_type')
+                Hidden::make('user_type')
                     ->visible(config('filament-media-manager.allow_user_access', false))
                     ->default(get_class(Auth::user())),
 
-                Forms\Components\TextInput::make('name')
-                    ->label(trans('filament-media-manager::messages.folders.columns.name'))
-                    ->columnSpanFull()
-                    ->lazy()
-                    ->afterStateUpdated(function ($set, $get) {
-                        $set('collection', Str::slug($get('name')));
+                // Parent folder selection (only shown when creating subfolder)
+                Select::make('parent_id')
+                    ->label('Parent Folder')
+                    ->placeholder('Root Level (No Parent)')
+                    ->searchable()
+                    ->options(function () {
+                        return Folder::query()
+                            ->whereDoesntHave('parent')
+                            ->orWhereNull('parent_id')
+                            ->pluck('name', 'id');
                     })
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('collection')
-                    ->label(trans('filament-media-manager::messages.folders.columns.collection'))
-                    ->columnSpanFull()
-                    ->readOnly()
-                    ->unique()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('description')
-                    ->label(trans('filament-media-manager::messages.folders.columns.description'))
-                    ->columnSpanFull()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('icon')
-                    ->label(trans('filament-media-manager::messages.folders.columns.icon'))
-                    ->placeholder('heroicon-o-folder')
-                    ->maxLength(255),
-                Forms\Components\ColorPicker::make('color')
-                    ->label(trans('filament-media-manager::messages.folders.columns.color')),
-                Forms\Components\Toggle::make('is_protected')
-                    ->label(trans('filament-media-manager::messages.folders.columns.is_protected'))
-                    ->live()
+                    ->hint('Leave empty to create a root level folder')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('password')
-                    ->label(trans('filament-media-manager::messages.folders.columns.password'))
-                    ->hidden(fn($get) => !$get('is_protected'))
-                    ->password()
-                    ->revealable()
+
+                // Main input - only folder name required
+                TextInput::make('name')
+                    ->label('Folder Name')
+                    ->columnSpanFull()
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('password_confirmation')
-                    ->label(trans('filament-media-manager::messages.folders.columns.password_confirmation'))
-                    ->hidden(fn($get) => !$get('is_protected'))
-                    ->password()
-                    ->required()
-                    ->revealable()
-                    ->same('password')
                     ->maxLength(255)
-            ])->columns(2);
+                    ->placeholder('Enter folder name')
+                    ->autofocus(),
+
+                // Auto-generated collection (hidden from user)
+                Hidden::make('collection'),
+
+                // Auto-generated icon (hidden from user)
+                Hidden::make('icon')
+                    ->default('heroicon-o-folder'),
+
+                // Auto-generated color (hidden from user)
+                Hidden::make('color')
+                    ->default('#3B82F6'), // Blue color
+
+                // Optional fields - collapsible section for advanced options
+                Section::make('Advanced Options')
+                    ->description('Optional settings that can be configured later')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        Textarea::make('description')
+                            ->label('Description')
+                            ->columnSpanFull()
+                            ->maxLength(255)
+                            ->placeholder('Optional folder description'),
+
+                        Toggle::make('is_protected')
+                            ->label('Password Protected')
+                            ->live()
+                            ->columnSpanFull(),
+
+                        TextInput::make('password')
+                            ->label('Password')
+                            ->hidden(fn($get) => !$get('is_protected'))
+                            ->password()
+                            ->revealable()
+                            ->required(fn($get) => $get('is_protected'))
+                            ->maxLength(255),
+
+                        TextInput::make('password_confirmation')
+                            ->label('Confirm Password')
+                            ->hidden(fn($get) => !$get('is_protected'))
+                            ->password()
+                            ->required(fn($get) => $get('is_protected'))
+                            ->revealable()
+                            ->same('password')
+                            ->maxLength(255)
+                    ])
+            ])->columns(1);
     }
 }
 

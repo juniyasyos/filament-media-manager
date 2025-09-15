@@ -5,6 +5,7 @@ namespace Juniyasyos\FilamentMediaManager\Resources\Actions;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Filament\Actions;
 use Filament\Forms;
+use Filament\Schemas\Components\Section;
 use Filament\Notifications\Notification;
 
 class CreateMediaAction
@@ -18,18 +19,29 @@ class CreateMediaAction
             ->label(trans('filament-media-manager::messages.media.actions.create.label'))
             ->icon('heroicon-o-plus')
             ->form([
-                Forms\Components\FileUpload::make('file')
-                    ->label(trans('filament-media-manager::messages.media.actions.create.form.file'))
-                    ->maxSize('100000')
-                    ->columnSpanFull()
-                    ->required()
-                    ->storeFiles(false),
-                Forms\Components\TextInput::make('title')
-                    ->label(trans('filament-media-manager::messages.media.actions.create.form.title'))
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('description')
-                    ->label(trans('filament-media-manager::messages.media.actions.create.form.description'))
-                    ->columnSpanFull(),
+                Section::make('Upload Media')
+                    ->description('Select file and provide media information')
+                    ->schema([
+                        Forms\Components\FileUpload::make('file')
+                            ->label(trans('filament-media-manager::messages.media.actions.create.form.file'))
+                            ->maxSize('100000')
+                            ->columnSpanFull()
+                            ->required()
+                            ->storeFiles(false),
+                    ])->columns(1),
+
+                Section::make('Media Information')
+                    ->description('Add title and description for the media')
+                    ->collapsible()
+                    ->collapsed()
+                    ->schema([
+                        Forms\Components\TextInput::make('title')
+                            ->label(trans('filament-media-manager::messages.media.actions.create.form.title'))
+                            ->columnSpanFull(),
+                        Forms\Components\Textarea::make('description')
+                            ->label(trans('filament-media-manager::messages.media.actions.create.form.description'))
+                            ->columnSpanFull(),
+                    ])->columns(1)
             ])
             ->action(function (array $data) use ($folder_id) {
                 $folder = Folder::find($folder_id);

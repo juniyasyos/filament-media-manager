@@ -14,16 +14,17 @@ class ListFolders extends ManageRecords
 {
     protected static string $resource = FolderResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make()
-        ];
-    }
+    public ?Folder $currentParent = null;
 
     public function mount(): void
     {
         session()->forget(['folder_id', 'folder_password']);
+
+        // Load current parent folder if specified
+        $parentId = request()->get('parent_id');
+        if ($parentId && $parentId !== 'root') {
+            $this->currentParent = Folder::find($parentId);
+        }
     }
 
     public function folderAction(?Folder $item = null)
@@ -35,12 +36,52 @@ class ListFolders extends ManageRecords
             ->view('filament-media-manager::pages.folder-action', ['item' => $item]);
     }
 
-    public function getBreadcrumbs(): array
+    protected function getHeaderActions(): array
     {
         return [
-            url('/') => 'Dashboard',
-            'folders'
+            Actions\CreateAction::make()
+                ->visible(fn() => hexa()->can('folder.create'))
+                ->label('New Folder')
+                ->icon('heroicon-o-folder-plus')
+                ->mutateFormDataUsing(function (array $data) {
+                    // Set parent_id if we're in a subfolder
+                    if ($this->currentParent && !isset($data['parent_id'])) {
+                        $data['parent_id'] = $this->currentParent->id;
+                    }
+                    return $data;
+                })
+                ->after(function () {
+                    // Refresh the page after creation to show the new folder
+                    $this->redirect(request()->fullUrl());
+                }),
         ];
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        $breadcrumbs = [
+            url('/') => 'Dashboard',
+        ];
+
+        if ($this->currentParent) {
+            // Build breadcrumb trail for hierarchy
+            $ancestors = $this->currentParent->getAncestors();
+
+            // Add root folders link
+            $breadcrumbs[FolderResource::getUrl('index')] = 'Folders';
+
+            // Add each ancestor
+            foreach ($ancestors as $ancestor) {
+                $breadcrumbs[FolderResource::getUrl('index', ['parent_id' => $ancestor->id])] = $ancestor->name;
+            }
+
+            // Add current parent
+            $breadcrumbs[] = $this->currentParent->name;
+        } else {
+            $breadcrumbs[] = 'Folders';
+        }
+
+        return $breadcrumbs;
     }
 
     protected function shouldRequirePassword(array $record): bool
@@ -81,35 +122,17 @@ class ListFolders extends ManageRecords
 
     protected function redirectToCorrectLocation(array $record)
     {
+        $folder = Folder::find($record['id']);
+
+        // Check if this folder has children - if yes, navigate into it
+        if ($folder && $folder->folders()->exists()) {
+            return redirect(
+                FolderResource::getUrl('index', ['parent_id' => $folder->id])
+            );
+        }
+
+        // If no children, this is probably a media folder - navigate to media
         $folderName = $record['name'];
-
-        // Media root (jika folder tidak berasosiasi ke model)
-        if (!$record['model_type']) {
-            return redirect(
-                FolderResource::getUrl('media', ['folderName' => $folderName])
-            );
-        }
-
-        // Folder level berdasarkan model_type saja
-        if (!$record['model_id'] && !$record['collection']) {
-            return redirect(
-                FolderResource::getUrl('index', [
-                    'model_type' => $record['model_type'],
-                ])
-            );
-        }
-
-        // Folder level berdasarkan model_type dan collection
-        if (!$record['model_id']) {
-            return redirect(
-                FolderResource::getUrl('index', [
-                    'model_type' => $record['model_type'],
-                    'collection' => $record['collection'],
-                ])
-            );
-        }
-
-        // Media folder spesifik
         return redirect(
             FolderResource::getUrl('media', ['folderName' => $folderName])
         );

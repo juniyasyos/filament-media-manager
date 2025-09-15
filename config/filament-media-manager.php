@@ -41,7 +41,9 @@ return [
     // Filament navigation control
     'navigation' => [
         // Global group name for all resources
-        'group' => null, // e.g. 'Media Manager' (null = use translations)
+        // Set to a string to group under that label.
+        // Set to null or '' for no group.
+        'group' => null,
 
         // FolderResource navigation settings
         'folders' => [

@@ -4,6 +4,7 @@ namespace Juniyasyos\FilamentMediaManager\Resources\MediaResource\Tables;
 
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Media;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
@@ -86,7 +87,27 @@ class MediaTable
             ])
             ->defaultSort('order_column', 'asc')
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    \Filament\Actions\ViewAction::make()
+                        ->label('View')
+                        ->icon('heroicon-o-eye')
+                        ->modalHeading('Media Details')
+                        ->modalContent(fn ($record) => view('filament-media-manager::modals.media-preview', ['media' => $record])),
+                    \Filament\Actions\EditAction::make(),
+                    \Filament\Actions\Action::make('download')
+                        ->label('Download')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->url(fn (Media $record) => $record->getUrl())
+                        ->openUrlInNewTab(),
+                    \Filament\Actions\DeleteAction::make()
+                        ->before(function (Media $record) {
+                            // Clean up media files
+                            $record->delete();
+                        }),
+                ])->label('Actions')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->size('sm')
+                    ->color('gray')
             ])
             ->defaultPaginationPageOption(12)
             ->paginationPageOptions([
@@ -96,9 +117,46 @@ class MediaTable
                 "96",
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make()
+                        ->before(function ($records) {
+                            // Clean up media files for bulk delete
+                            foreach ($records as $record) {
+                                $record->delete();
+                            }
+                        }),
                 ]),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('collection_name')
+                    ->label('Collection')
+                    ->options(function () {
+                        return Media::query()
+                            ->distinct()
+                            ->pluck('collection_name', 'collection_name')
+                            ->toArray();
+                    }),
+                Tables\Filters\SelectFilter::make('mime_type')
+                    ->label('File Type')
+                    ->options([
+                        'image/jpeg' => 'JPEG Image',
+                        'image/png' => 'PNG Image',
+                        'image/gif' => 'GIF Image',
+                        'image/svg+xml' => 'SVG Image',
+                        'application/pdf' => 'PDF Document',
+                        'video/mp4' => 'MP4 Video',
+                        'video/webm' => 'WebM Video',
+                    ]),
+                Tables\Filters\Filter::make('large_files')
+                    ->label('Large Files (>1MB)')
+                    ->query(fn ($query) => $query->where('size', '>', 1048576)),
+            ])
+            ->headerActions([
+                \Filament\Actions\Action::make('upload_multiple')
+                    ->label('Upload Multiple Files')
+                    ->icon('heroicon-o-cloud-arrow-up')
+                    ->color('primary')
+                    ->visible(fn () => request()->has('folder_id')),
             ]);
     }
 }

@@ -4,6 +4,7 @@ namespace Juniyasyos\FilamentMediaManager\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -13,6 +14,8 @@ class Folder extends Model implements HasMedia
 
     protected $fillable = [
         'parent_id',
+        'path',
+        'depth',
         'model_type',
         'model_id',
         'name',
@@ -81,5 +84,132 @@ class Folder extends Model implements HasMedia
     public function parent()
     {
         return $this->belongsTo(Folder::class, 'parent_id');
+    }
+
+    // Hierarchy helper methods
+
+    /**
+     * Get all ancestors (parent, grandparent, etc.)
+     */
+    public function getAncestors()
+    {
+        $ancestors = collect();
+        $current = $this->parent;
+
+        while ($current) {
+            $ancestors->prepend($current);
+            $current = $current->parent;
+        }
+
+        return $ancestors;
+    }
+
+    /**
+     * Get all descendants (children, grandchildren, etc.)
+     */
+    public function getDescendants()
+    {
+        return $this->folders()->with('folders')->get()->flatMap(function ($folder) {
+            return [$folder, ...$folder->getDescendants()];
+        });
+    }
+
+    /**
+     * Get the folder path as string (e.g., "Root/Subfolder/Current")
+     */
+    public function getFolderPath($separator = '/')
+    {
+        $ancestors = $this->getAncestors();
+        $path = $ancestors->pluck('name')->push($this->name);
+        return $path->join($separator);
+    }
+
+    /**
+     * Update the path column when folder hierarchy changes
+     */
+    public function updatePath()
+    {
+        $this->path = $this->getFolderPath('/');
+        $this->depth = $this->getAncestors()->count();
+        $this->save();
+
+        // Update all descendants
+        $this->folders->each(function ($child) {
+            $child->updatePath();
+        });
+    }
+
+    /**
+     * Check if current folder is ancestor of given folder
+     */
+    public function isAncestorOf(Folder $folder)
+    {
+        return $folder->getAncestors()->contains('id', $this->id);
+    }
+
+    /**
+     * Check if current folder is descendant of given folder
+     */
+    public function isDescendantOf(Folder $folder)
+    {
+        return $this->getAncestors()->contains('id', $folder->id);
+    }
+
+    /**
+     * Get root folder (top-level parent)
+     */
+    public function getRoot()
+    {
+        $current = $this;
+        while ($current->parent) {
+            $current = $current->parent;
+        }
+        return $current;
+    }
+
+    /**
+     * Boot method to handle path updates and auto-generation
+     */
+    protected static function booted()
+    {
+        // Auto-generate collection if not provided
+        static::creating(function ($folder) {
+            if (empty($folder->collection)) {
+                $folder->collection = static::generateUniqueCollection($folder->name);
+            }
+
+            // Set default values if not provided
+            if (empty($folder->icon)) {
+                $folder->icon = 'heroicon-o-folder';
+            }
+
+            if (empty($folder->color)) {
+                $folder->color = '#3B82F6'; // Blue color
+            }
+        });
+
+        static::saved(function ($folder) {
+            if ($folder->wasChanged('parent_id') || $folder->wasChanged('name')) {
+                $folder->updatePath();
+            }
+        });
+    }
+
+    /**
+     * Generate unique collection name from folder name
+     */
+    protected static function generateUniqueCollection(string $name): string
+    {
+        $baseSlug = Str::slug($name);
+        $collection = $baseSlug;
+        $counter = 1;
+
+        // Check if collection already exists and make it unique
+        while (static::where('collection', $collection)->exists()) {
+            $collection = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $collection;
     }
 }

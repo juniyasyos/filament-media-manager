@@ -83,12 +83,20 @@ class ListMedia extends ManageRecords
 
         $isAllowed = $isOwner || ! filament(config('filament-media-manager.allow_user_access', false));
 
-        return $isAllowed ? [
-            CreateMediaAction::make($folder->id),
-            CreateSubFolderAction::make($folder->id),
-            DeleteFolderAction::make($folder->id),
-            EditCurrentFolderAction::make($folder->id),
-        ] : [];
+        if (! $isAllowed) {
+            return [];
+        }
+
+        return [
+            CreateMediaAction::make($folder->id)
+                ->visible(fn () => hexa()->can('media.create')),
+            CreateSubFolderAction::make($folder->id)
+                ->visible(fn () => hexa()->can('folder.create')),
+            DeleteFolderAction::make($folder->id)
+                ->visible(fn () => hexa()->can('folder.delete')),
+            EditCurrentFolderAction::make($folder->id)
+                ->visible(fn () => hexa()->can('folder.update')),
+        ];
     }
 
     public function folderAction(?Folder $item = null): Actions\Action
@@ -115,7 +123,6 @@ class ListMedia extends ManageRecords
 
     protected function handleFolderRedirect(array $record, array $data)
     {
-        dd($record, $data);
         if ($record['is_protected'] && ($record['password'] !== ($data['password'] ?? null))) {
             return $this->notifyWrongPassword();
         }
@@ -165,6 +172,7 @@ class ListMedia extends ManageRecords
             ->icon('heroicon-s-trash')
             ->color('danger')
             ->requiresConfirmation()
+            ->visible(fn () => hexa()->can('media.delete'))
             ->action(fn (array $arguments) => $this->handleDeleteMedia($arguments['record']['id'] ?? null));
     }
 
