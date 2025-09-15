@@ -1,60 +1,332 @@
-/* Google Drive Inspired Styles for Filament Media Manager */
+/* ===================================
+   FILAMENT MEDIA MANAGER STYLES
+   =================================== */
 
-/* CSS Custom Properties */
+/*
+   CLASS MAPPING UNTUK HTML ELEMENTS:
+
+   Input Elements:
+   - input[type="search"] → class="mm-search-input"
+   - select → class="mm-select"
+   - input[type="checkbox"] → class="mm-checkbox"
+
+   Contoh penggunaan:
+   <input type="search" class="mm-search-input" placeholder="Search...">
+   <select class="mm-select">
+   <input type="checkbox" class="mm-checkbox">
+*/
+
+/* CSS Custom Properties - Inherit from Parent Theme */
 :root {
-    /* clarity helpers - enhanced for light mode contrast */
-    --clarity-border-strong: var(--gray-400);
-    --clarity-border-subtle: var(--gray-300);
-    --clarity-shadow-sm: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.08);
-    --clarity-shadow-md: 0 4px 6px rgba(0,0,0,.1), 0 2px 4px rgba(0,0,0,.06);
-    --clarity-focus-ring: 0 0 0 2px var(--primary-600), 0 0 0 4px color-mix(in oklab, var(--primary-600), transparent 70%);
+    /* Media Manager menggunakan parent theme variables */
+    --mm-background: hsl(var(--background));
+    --mm-card: hsl(var(--card));
+    --mm-foreground: hsl(var(--foreground));
+    --mm-primary: hsl(var(--primary));
+    --mm-muted: hsl(var(--muted));
+    --mm-border: hsl(var(--border));
+    --mm-input: hsl(var(--input));
+    --mm-radius: var(--radius);
 
-    /* Keep only unique gdrive properties not available in parent */
-    --gdrive-transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    /* Media Manager specific enhancements */
+    --mm-shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --mm-shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.03);
+    --mm-shadow-lg: 0 10px 15px rgba(0,0,0,.1), 0 4px 6px rgba(0,0,0,.05);
+
+    /* Focus ring menggunakan ring dari parent */
+    --mm-focus-ring: 0 0 0 2px hsl(var(--ring));
+
+    /* Transition system */
+    --mm-transition-fast: all 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+    --mm-transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+
+    /* Spacing menggunakan sistem yang konsisten */
+    --mm-space-xs: 0.25rem;
+    --mm-space-sm: 0.5rem;
+    --mm-space-md: 0.75rem;
+    --mm-space-lg: 1rem;
+    --mm-space-xl: 1.5rem;
+    --mm-space-2xl: 2rem;
 }
 
-/* Dark mode properties */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --clarity-border-strong: color-mix(in oklab, var(--gray-600), white 15%);
-        --clarity-border-subtle: var(--gray-700);
-        --clarity-shadow-sm: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
-        --clarity-shadow-md: 0 4px 6px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.2);
-        --clarity-focus-ring: 0 0 0 2px var(--ring), 0 0 0 4px color-mix(in oklab, var(--ring), black 70%);
-    }
+/* ===================================
+   MEDIA GRID AND CARDS
+   =================================== */
+
+/* Media Grid Layout */
+.gdrive-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--mm-space-lg);
+    padding: var(--mm-space-lg);
+}
+
+/* Media Card Styling */
+.gdrive-media-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--mm-space-lg);
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius);
+    box-shadow: var(--mm-shadow-sm);
+    padding: var(--mm-space-sm);
+    width: 100%;
+    height: 100%;
+    background-color: var(--mm-card);
+    transition: var(--mm-transition);
+}
+
+.gdrive-media-card:hover {
+    box-shadow: var(--mm-shadow-md);
+    transform: translateY(-2px);
+}
+
+/* Media Preview Section */
+.media-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--mm-space-lg);
+    height: 200px;
+    border-radius: var(--mm-radius);
+    background-color: var(--mm-muted);
+}
+
+.media-image,
+.media-video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    border-radius: var(--mm-radius);
+}
+
+.media-icon {
+    width: 4rem;
+    height: 4rem;
+    color: var(--mm-foreground);
+}
+
+.audio-icon {
+    color: var(--mm-primary);
+}
+
+/* Media Info Section */
+.media-info {
+    border-top: 1px solid var(--mm-border);
+    padding: var(--mm-space-lg);
+}
+
+.media-header {
+    margin-bottom: var(--mm-space-md);
+}
+
+.media-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--mm-foreground);
+    word-break: break-words;
+    line-height: 1.4;
+}
+
+.media-description-section {
+    margin-bottom: var(--mm-space-md);
+}
+
+.media-description-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+    margin-bottom: var(--mm-space-xs);
+}
+
+.media-description {
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+    opacity: 0.8;
+}
+
+.media-date {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.media-timestamp {
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===================================
+   MEDIA MODAL COMPONENTS
+   =================================== */
+
+/* Modal Content */
+.media-modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+/* Fullsize Media Container */
+.media-fullsize-container {
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius);
+    background-color: var(--mm-card);
+    overflow: hidden;
+}
+
+.media-fullsize-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--mm-space-lg);
+    height: auto;
+    min-height: 300px;
+}
+
+.media-fullsize-image,
+.media-fullsize-video,
+.media-fullsize-audio {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+}
+
+.media-fullsize-icon {
+    width: 8rem;
+    height: 8rem;
+    color: var(--mm-foreground);
+}
+
+/* Metadata Section */
+.media-metadata {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mm-space-lg);
+    margin: var(--mm-space-lg) 0;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mm-space-xs);
+}
+
+.metadata-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+}
+
+.metadata-value {
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+    opacity: 0.8;
+    word-break: break-all;
+}
+
+/* ===================================
+   EMPTY STATE COMPONENTS
+   =================================== */
+
+.gdrive-empty-state {
+    padding: var(--mm-space-2xl) var(--mm-space-xl);
+}
+
+.empty-state-content {
+    margin: 0 auto;
+    display: grid;
+    max-width: 32rem;
+    justify-items: center;
+    text-align: center;
+}
+
+.empty-state-icon {
+    margin-bottom: var(--mm-space-lg);
+    border-radius: 50%;
+    background-color: var(--mm-muted);
+    padding: var(--mm-space-md);
+}
+
+.empty-icon {
+    height: 1.5rem;
+    width: 1.5rem;
+    color: var(--mm-foreground);
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--mm-foreground);
+}
+
+/* ===================================
+   MEDIA MANAGER CONTAINER
+   =================================== */
+
+/* Main Container Styling - Menggunakan Parent Theme */
+.gdrive-content {
+    background-color: var(--mm-background);
+    min-height: 100vh;
+}
+
+/* ===================================
+   FOLDER CARDS (UNIQUE COMPONENT)
+   =================================== */
+
+/* Folder Card Styling - Preserving unique media manager design */
+.gdrive-folder-card {
+    background-color: var(--mm-card);
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius);
+    box-shadow: none;
+    transition: var(--mm-transition);
+    min-height: 160px;
+    position: relative;
+    overflow: hidden;
 }
 
 /* Main Container Styling - Theme Responsive */
 .gdrive-content {
-    background-color: var(--gray-50);
+    background-color: var(--mm-muted);
     min-height: 100vh;
 }
 
 .gdrive-header {
-    background-color: var(--white);
-    border-bottom: 1px solid var(--clarity-border-subtle);
+    background-color: var(--mm-card);
+    border-bottom: 1px solid var(--mm-border-medium);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 0;
 }
 
 /* Folder Card Styling - Theme Responsive */
 .gdrive-folder-card {
-    background-color: var(--white);
-    border: 1px solid var(--clarity-border-subtle);
+    background-color: var(--mm-card);
+    border: 1px solid var(--mm-border-medium);
     border-radius: var(--rounded-lg);
     box-shadow: none;
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
     min-height: 160px;
     position: relative;
     overflow: hidden;
 }
 
 .gdrive-folder-card:hover {
-    box-shadow: var(--clarity-shadow-sm);
+    box-shadow: var(--mm-shadow-sm);
     transform: translateY(-1px);
-    border-color: var(--clarity-border-strong);
+    border-color: var(--mm-border-strong);
 }
 
 .gdrive-folder-card .line-clamp-2 {
@@ -91,8 +363,8 @@
 /* View Toggle Buttons - Theme Responsive */
 .view-toggle-btn {
     padding: 8px;
-    border-radius: 6px;
-    transition: var(--gdrive-transition);
+    border-radius: var(--mm-radius);
+    transition: var(--mm-transition);
     color: var(--gray-500);
     border: none;
     background: transparent;
@@ -100,19 +372,19 @@
 
 .view-toggle-btn:hover {
     background-color: var(--gray-100);
-    color: var(--gray-900);
+    color: var(--mm-foreground);
 }
 
 .view-toggle-btn.active {
-    background-color: var(--primary-600);
-    color: var(--white);
+    background-color: var(--mm-primary);
+    color: var(--mm-card);
 }
 
 /* Responsive Grid Improvements */
 @media (max-width: 640px) {
     .folders-grid .grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: var(--mm-space-md);
     }
 
     .gdrive-folder-card {
@@ -146,11 +418,11 @@
 
 /* List View Enhancements - Theme Responsive */
 .folder-list-item {
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
 }
 
 .folder-list-item:hover {
-    background-color: var(--gray-50);
+    background-color: var(--mm-muted);
 }
 
 /* Loading States - Theme Responsive */
@@ -176,24 +448,24 @@
 }
 
 /* Search and Filter Styling - Theme Responsive */
-input[type="search"],
-select {
-    transition: var(--gdrive-transition);
-    border: 1px solid var(--clarity-border-subtle) !important;
-    background-color: var(--white);
+.mm-search-input,
+.mm-select {
+    transition: var(--mm-transition);
+    border: 1px solid var(--mm-border-medium) !important;
+    background-color: var(--mm-card);
     box-shadow: none;
 }
 
-input[type="search"]:hover,
-select:hover {
-    border-color: var(--clarity-border-strong) !important;
+.mm-search-input:hover,
+.mm-select:hover {
+    border-color: var(--mm-border-strong) !important;
     box-shadow: none;
 }
 
-input[type="search"]:focus,
-select:focus {
-    border-color: var(--primary-600) !important;
-    box-shadow: var(--clarity-focus-ring) !important;
+.mm-search-input:focus,
+.mm-select:focus {
+    border-color: var(--mm-primary) !important;
+    box-shadow: var(--mm-focus-ring) !important;
     outline: none !important;
 }
 
@@ -203,11 +475,11 @@ select:focus {
     align-items: center;
     color: var(--gray-500);
     text-decoration: none;
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
 }
 
 .breadcrumb-item:hover {
-    color: var(--gray-900);
+    color: var(--mm-foreground);
 }
 
 /* Custom Scrollbar - Theme Responsive */
@@ -216,28 +488,28 @@ select:focus {
 }
 
 .gdrive-content::-webkit-scrollbar-track {
-    background: var(--gray-50);
+    background: var(--mm-muted);
 }
 
 .gdrive-content::-webkit-scrollbar-thumb {
-    background-color: var(--clarity-border-subtle);
+    background-color: var(--mm-border-medium);
     border-radius: 4px;
 }
 
 .gdrive-content::-webkit-scrollbar-thumb:hover {
-    background-color: var(--clarity-border-strong);
+    background-color: var(--mm-border-strong);
 }
 
 /* Selection and Actions - Theme Responsive */
-input[type="checkbox"] {
-    accent-color: var(--primary-600);
+.mm-checkbox {
+    accent-color: var(--mm-primary);
 }
 
 /* Quick Actions - Theme Responsive */
 .quick-action-btn {
     padding: 6px;
     border-radius: 4px;
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
     color: var(--gray-500);
     background: transparent;
     border: none;
@@ -245,7 +517,7 @@ input[type="checkbox"] {
 
 .quick-action-btn:hover {
     background-color: var(--gray-100);
-    color: var(--gray-900);
+    color: var(--mm-foreground);
 }
 
 /* Animations */
@@ -273,48 +545,48 @@ input[type="checkbox"] {
 }
 
 .shadow-gdrive {
-    box-shadow: var(--clarity-shadow-sm);
+    box-shadow: var(--mm-shadow-sm);
 }
 
 .shadow-gdrive-hover {
-    box-shadow: var(--clarity-shadow-md);
+    box-shadow: var(--mm-shadow-md);
 }
 
 /* Border Utility Classes */
 .border-strong {
-    border: 1px solid var(--clarity-border-strong);
+    border: 1px solid var(--mm-border-strong);
 }
 
 .border-subtle {
-    border: 1px solid var(--clarity-border-subtle);
+    border: 1px solid var(--mm-border-medium);
 }
 
 .hover-border-primary:hover {
-    border-color: var(--primary-600);
+    border-color: var(--mm-primary);
     border-width: 2px;
 }
 
 /* Interactive Element Enhancements */
 .interactive-element {
-    transition: var(--gdrive-transition);
-    border: 1px solid var(--clarity-border-subtle);
+    transition: var(--mm-transition);
+    border: 1px solid var(--mm-border-medium);
 }
 
 .interactive-element:hover {
-    border-color: var(--clarity-border-strong);
-    box-shadow: var(--clarity-shadow-sm);
+    border-color: var(--mm-border-strong);
+    box-shadow: var(--mm-shadow-sm);
 }
 
 .interactive-element:focus,
 .interactive-element:focus-within {
-    border-color: var(--primary-600);
-    box-shadow: var(--clarity-focus-ring);
+    border-color: var(--mm-primary);
+    box-shadow: var(--mm-focus-ring);
     outline: none;
 }
 
 /* Focus States - Theme Responsive */
 .focus-ring:focus {
-    outline: 2px solid var(--primary-600);
+    outline: 2px solid var(--mm-primary);
     outline-offset: 2px;
 }
 
@@ -343,8 +615,8 @@ input[type="checkbox"] {
 }
 
 .manager-header {
-    background: var(--white);
-    border-bottom: 1px solid var(--clarity-border-subtle);
+    background: var(--mm-card);
+    border-bottom: 1px solid var(--mm-border-medium);
     margin-bottom: 24px;
 }
 
@@ -358,13 +630,13 @@ input[type="checkbox"] {
 
 .breadcrumb-section {
     padding: 16px 24px;
-    border-bottom: 1px solid var(--clarity-border-subtle);
+    border-bottom: 1px solid var(--mm-border-medium);
 }
 
 .breadcrumb-content {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--mm-space-lg);
 }
 
 .back-button {
@@ -374,17 +646,17 @@ input[type="checkbox"] {
     padding: 8px 12px;
     color: var(--gray-500);
     text-decoration: none;
-    border: 1px solid var(--clarity-border-subtle);
+    border: 1px solid var(--mm-border-medium);
     border-radius: var(--rounded);
     font-size: 14px;
-    transition: var(--gdrive-transition);
-    background: var(--white);
+    transition: var(--mm-transition);
+    background: var(--mm-card);
 }
 
 .back-button:hover {
     background: var(--gray-100);
-    color: var(--gray-900);
-    border-color: var(--clarity-border-strong);
+    color: var(--mm-foreground);
+    border-color: var(--mm-border-strong);
 }
 
 .back-icon {
@@ -403,12 +675,12 @@ input[type="checkbox"] {
 .current-folder-icon {
     width: 20px;
     height: 20px;
-    color: var(--primary-600);
+    color: var(--mm-primary);
 }
 
 .current-folder-name {
     font-weight: 600;
-    color: var(--gray-900);
+    color: var(--mm-foreground);
 }
 
 .current-folder-path {
@@ -430,13 +702,13 @@ input[type="checkbox"] {
 .toolbar-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--mm-space-lg);
 }
 
 .toolbar-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--mm-space-lg);
 }
 
 /* Search Container */
@@ -444,25 +716,25 @@ input[type="checkbox"] {
     position: relative;
 }
 
-.search-input {
+.search-input, .mm-search-input {
     width: 256px;
     padding: 8px 12px 8px 36px;
-    border: 1px solid var(--clarity-border-subtle);
+    border: 1px solid var(--mm-border-medium);
     border-radius: var(--rounded);
     font-size: 14px;
-    background: var(--white);
-    color: var(--gray-900);
-    transition: var(--gdrive-transition);
+    background: var(--mm-card);
+    color: var(--mm-foreground);
+    transition: var(--mm-transition);
 }
 
-.search-input:hover {
-    border-color: var(--clarity-border-strong);
+.search-input, .mm-search-input:hover {
+    border-color: var(--mm-border-strong);
 }
 
-.search-input:focus {
+.search-input, .mm-search-input:focus {
     outline: none;
-    border-color: var(--primary-600);
-    box-shadow: var(--clarity-focus-ring);
+    border-color: var(--mm-primary);
+    box-shadow: var(--mm-focus-ring);
 }
 
 .search-icon {
@@ -480,26 +752,26 @@ input[type="checkbox"] {
     position: relative;
 }
 
-.sort-select {
+.sort-select, .mm-select {
     appearance: none;
-    background: var(--white);
-    border: 1px solid var(--clarity-border-subtle);
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border-medium);
     border-radius: var(--rounded);
     padding: 8px 32px 8px 12px;
     font-size: 14px;
     cursor: pointer;
-    color: var(--gray-900);
-    transition: var(--gdrive-transition);
+    color: var(--mm-foreground);
+    transition: var(--mm-transition);
 }
 
-.sort-select:hover {
-    border-color: var(--clarity-border-strong);
+.sort-select, .mm-select:hover {
+    border-color: var(--mm-border-strong);
 }
 
-.sort-select:focus {
+.sort-select, .mm-select:focus {
     outline: none;
-    border-color: var(--primary-600);
-    box-shadow: var(--clarity-focus-ring);
+    border-color: var(--mm-primary);
+    box-shadow: var(--mm-focus-ring);
 }
 
 .sort-icon {
@@ -519,24 +791,24 @@ input[type="checkbox"] {
     background: var(--gray-100);
     border-radius: var(--rounded);
     padding: 2px;
-    border: 1px solid var(--clarity-border-subtle);
+    border: 1px solid var(--mm-border-medium);
 }
 
 .select-all-btn {
     background: none;
-    border: 1px solid var(--clarity-border-subtle);
+    border: 1px solid var(--mm-border-medium);
     color: var(--gray-500);
     font-size: 14px;
     cursor: pointer;
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
     padding: 8px 12px;
     border-radius: var(--rounded);
-    background: var(--white);
+    background: var(--mm-card);
 }
 
 .select-all-btn:hover {
-    color: var(--gray-900);
-    border-color: var(--clarity-border-strong);
+    color: var(--mm-foreground);
+    border-color: var(--mm-border-strong);
     background: var(--gray-100);
 }
 
@@ -546,21 +818,21 @@ input[type="checkbox"] {
 
 .folder-card {
     display: block;
-    padding: 16px;
-    background: var(--white);
-    border: 1px solid var(--clarity-border-subtle);
+    padding: var(--mm-space-lg);
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border-medium);
     border-radius: var(--rounded-lg);
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
     height: 100%;
     min-height: 140px;
-    box-shadow: var(--clarity-shadow-sm);
+    box-shadow: var(--mm-shadow-sm);
 }
 
 .folder-card:hover {
-    border-color: var(--primary-600);
-    box-shadow: var(--clarity-shadow-md);
+    border-color: var(--mm-primary);
+    box-shadow: var(--mm-shadow-md);
     transform: translateY(-2px);
-    box-shadow: var(--clarity-shadow-md), 0 0 0 2px color-mix(in oklab, var(--primary-600), transparent 70%);
+    box-shadow: var(--mm-shadow-md), 0 0 0 2px color-mix(in oklab, var(--mm-primary), transparent 70%);
 }
 
 .folder-icon-container {
@@ -595,15 +867,15 @@ input[type="checkbox"] {
 .protection-icon {
     width: 10px;
     height: 10px;
-    color: var(--white);
+    color: var(--mm-card);
 }
 
 .count-badge {
     position: absolute;
     top: -4px;
     right: -4px;
-    background: var(--primary-600);
-    color: var(--white);
+    background: var(--mm-primary);
+    color: var(--mm-card);
     border-radius: 50%;
     width: 18px;
     height: 18px;
@@ -621,7 +893,7 @@ input[type="checkbox"] {
 .folder-name {
     font-weight: 600;
     font-size: 14px;
-    color: var(--gray-900);
+    color: var(--mm-foreground);
     margin-bottom: 8px;
     white-space: nowrap;
     overflow: hidden;
@@ -680,7 +952,7 @@ input[type="checkbox"] {
 .folder-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
+    gap: var(--mm-space-lg);
 }
 
 .folder-link {
@@ -694,8 +966,8 @@ input[type="checkbox"] {
 
 /* List View */
 .folder-list {
-    background: var(--white);
-    border: 1px solid var(--clarity-border-subtle);
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border-medium);
     border-radius: var(--rounded-lg);
     overflow: hidden;
 }
@@ -703,10 +975,10 @@ input[type="checkbox"] {
 .list-header {
     display: grid;
     grid-template-columns: 1fr auto auto auto;
-    gap: 16px;
+    gap: var(--mm-space-lg);
     padding: 12px 16px;
     background: var(--gray-100);
-    border-bottom: 1px solid var(--clarity-border-subtle);
+    border-bottom: 1px solid var(--mm-border-medium);
     font-weight: 600;
     font-size: 12px;
     color: var(--gray-500);
@@ -716,16 +988,16 @@ input[type="checkbox"] {
 .list-row {
     display: grid;
     grid-template-columns: 1fr auto auto auto;
-    gap: 16px;
+    gap: var(--mm-space-lg);
     padding: 12px 16px;
-    border-bottom: 1px solid var(--clarity-border-subtle);
+    border-bottom: 1px solid var(--mm-border-medium);
     text-decoration: none;
     color: inherit;
-    transition: var(--gdrive-transition);
+    transition: var(--mm-transition);
 }
 
 .list-row:hover {
-    background: var(--gray-50);
+    background: var(--mm-muted);
 }
 
 .list-row:last-child {
@@ -740,16 +1012,16 @@ input[type="checkbox"] {
 .list-item-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--mm-space-md);
     min-width: 0;
     flex: 1;
 }
 
-.item-checkbox {
+.item-checkbox, .mm-checkbox {
     width: 16px;
     height: 16px;
     border-radius: calc(var(--rounded) / 2);
-    accent-color: var(--primary-600);
+    accent-color: var(--mm-primary);
 }
 
 .list-folder-icon {
@@ -765,7 +1037,7 @@ input[type="checkbox"] {
 
 .item-name {
     font-weight: 500;
-    color: var(--gray-900);
+    color: var(--mm-foreground);
     font-size: 14px;
     margin: 0;
     white-space: nowrap;
@@ -816,7 +1088,7 @@ input[type="checkbox"] {
 .empty-title {
     font-size: 18px;
     font-weight: 600;
-    color: var(--gray-900);
+    color: var(--mm-foreground);
     margin-bottom: 8px;
 }
 
@@ -831,7 +1103,7 @@ input[type="checkbox"] {
 
 @media (max-width: 768px) {
     .manager-header {
-        margin-bottom: 16px;
+        margin-bottom: var(--mm-space-lg);
     }
 
     .breadcrumb-section,
@@ -842,16 +1114,16 @@ input[type="checkbox"] {
     .toolbar {
         flex-direction: column;
         align-items: stretch;
-        gap: 16px;
+        gap: var(--mm-space-lg);
     }
 
     .toolbar-left {
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: var(--mm-space-md);
     }
 
-    .search-input {
+    .search-input, .mm-search-input {
         width: 100%;
     }
 
@@ -865,12 +1137,12 @@ input[type="checkbox"] {
 
     .folder-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 12px;
+        gap: var(--mm-space-md);
     }
 
     .folder-card {
         min-height: 120px;
-        padding: 12px;
+        padding: var(--mm-space-md);
     }
 
     .folder-main-icon {
@@ -881,7 +1153,7 @@ input[type="checkbox"] {
     .list-header,
     .list-row {
         grid-template-columns: 1fr auto;
-        gap: 12px;
+        gap: var(--mm-space-md);
     }
 
     .list-col:nth-child(3),

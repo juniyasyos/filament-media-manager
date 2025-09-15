@@ -1,21 +1,25 @@
 
 @php
+    // Optimize by caching frequently accessed data
     $currentParent = $this->currentParent ?? null;
     $parentId = request()->get('parent_id');
     $viewMode = session('folder_view_mode', 'grid'); // grid or list
+
+    // Pre-load parent relationship to avoid N+1 queries
+    $parentWithRelations = $currentParent?->load('parent');
 @endphp
 
-<div class="media-manager-container">
+<div class="gdrive-content">
     <!-- Header Section -->
-    <div class="manager-header">
+    <div class="gdrive-header">
         <!-- Breadcrumb Navigation -->
         @if($currentParent || $parentId)
             <div class="breadcrumb-section">
                 <div class="breadcrumb-content">
-                    @if($currentParent && $currentParent->parent)
-                        <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('index', ['parent_id' => $currentParent->parent->id]) }}" class="back-button">
+                    @if($parentWithRelations && $parentWithRelations->parent)
+                        <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('index', ['parent_id' => $parentWithRelations->parent->id]) }}" class="back-button">
                             <x-filament::icon icon="heroicon-o-chevron-left" class="back-icon" />
-                            Back to {{ $currentParent->parent->name }}
+                            Back to {{ $parentWithRelations->parent->name }}
                         </a>
                     @elseif($currentParent)
                         <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('index') }}" class="back-button">
@@ -42,20 +46,20 @@
             <!-- Left Side: Search and Sort -->
             <div class="toolbar-left">
                 <!-- Search Box -->
-                <div class="search-container">
+                {{-- <div class="search-container">
                     <x-filament::icon icon="heroicon-o-magnifying-glass" class="search-icon" />
-                    <input type="search" placeholder="Search folders..." class="search-input" id="folder-search">
-                </div>
+                    <input type="search" placeholder="Search folders..." class="mm-search-input" id="folder-search">
+                </div> --}}
 
                 <!-- Sort Dropdown -->
-                <div class="sort-container">
-                    <select class="sort-select">
+                {{-- <div class="sort-container">
+                    <select class="mm-select">
                         <option value="name">Sort by Name</option>
                         <option value="date">Sort by Date</option>
                         <option value="size">Sort by Size</option>
                     </select>
                     <x-filament::icon icon="heroicon-o-chevron-down" class="sort-icon" />
-                </div>
+                </div> --}}
             </div>
 
             <!-- Right Side: View Toggle -->
@@ -71,13 +75,13 @@
                 </div>
 
                 <!-- Select All -->
-                <button class="select-all-btn">Select all</button>
+                {{-- <button class="select-all-btn">Select all</button> --}}
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="manager-content">
+    <div class="gdrive-main-content">
         <!-- Grid View -->
         <div id="grid-view" class="folders-grid {{ $viewMode === 'grid' ? '' : 'hidden' }}">
             @if(count($records) > 0)
@@ -129,7 +133,7 @@
                             <!-- Name with Icon -->
                             <div class="list-col">
                                 <div class="list-item-info">
-                                    <input type="checkbox" class="item-checkbox">
+                                    <input type="checkbox" class="mm-checkbox">
                                     <x-filament::icon :icon="$item->icon ?? 'heroicon-o-folder'"
                                                       class="list-folder-icon"
                                                       style="color: {{ $item->color ?? '#3B82F6' }}" />

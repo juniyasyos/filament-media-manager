@@ -1,13 +1,16 @@
 @php
+    // Optimize folder card data - reduce database calls
     $folderIcon = $item->icon ?? 'heroicon-o-folder';
     $folderColor = $item->color ?? '#3B82F6';
     $isProtected = $item->is_protected ?? false;
-    $hasChildren = $item->folders()->exists();
-    $mediaCount = $item->media()->count();
-    $subFolderCount = $item->folders()->count();
+
+    // Use pre-loaded relationships to avoid N+1 queries
+    $hasChildren = $item->relationLoaded('folders') ? $item->folders->isNotEmpty() : $item->folders()->exists();
+    $mediaCount = $item->relationLoaded('media') ? $item->media->count() : $item->media()->count();
+    $subFolderCount = $item->relationLoaded('folders') ? $item->folders->count() : $item->folders()->count();
 @endphp
 
-<div class="folder-card">
+<div class="gdrive-folder-card">
     <div class="folder-icon-container">
         <div class="folder-icon" style="color: {{ $folderColor }}">
             <x-filament::icon :icon="$folderIcon" class="folder-main-icon" />
