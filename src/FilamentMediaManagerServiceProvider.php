@@ -43,6 +43,12 @@ class FilamentMediaManagerServiceProvider extends ServiceProvider
             __DIR__ . '/../resources/lang' => base_path('lang/vendor/filament-media-manager'),
         ], 'filament-media-manager-lang');
 
+        // Publish Assets (CSS & JS)
+        $this->publishes([
+            __DIR__ . '/../resources/css' => public_path('vendor/filament-media-manager/css'),
+            __DIR__ . '/../resources/js' => public_path('vendor/filament-media-manager/js'),
+        ], 'filament-media-manager-assets');
+
         // Load Routes If API is Enabled
         if (config('filament-media-manager.api.active')) {
             $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');

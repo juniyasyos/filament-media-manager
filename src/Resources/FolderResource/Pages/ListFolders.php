@@ -3,10 +3,8 @@
 namespace Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 
 use Filament\Actions;
-use Illuminate\Support\Facades\Gate;
-use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
+use Filament\Notifications\Notification;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource;
 
@@ -27,15 +25,6 @@ class ListFolders extends ManageRecords
         }
     }
 
-    public function folderAction(?Folder $item = null)
-    {
-        return Actions\Action::make('folderAction')
-            ->requiresConfirmation(fn(array $arguments) => $this->shouldRequirePassword($arguments['record']))
-            ->form(fn(array $arguments) => $this->getPasswordForm($arguments['record']))
-            ->action(fn(array $arguments, array $data) => $this->handleFolderAction($arguments['record'], $data))
-            ->view('filament-media-manager::pages.folder-action', ['item' => $item]);
-    }
-
     protected function getHeaderActions(): array
     {
         return [
@@ -49,10 +38,6 @@ class ListFolders extends ManageRecords
                         $data['parent_id'] = $this->currentParent->id;
                     }
                     return $data;
-                })
-                ->after(function () {
-                    // Refresh the page after creation to show the new folder
-                    $this->redirect(request()->fullUrl());
                 }),
         ];
     }
@@ -82,59 +67,5 @@ class ListFolders extends ManageRecords
         }
 
         return $breadcrumbs;
-    }
-
-    protected function shouldRequirePassword(array $record): bool
-    {
-        return $record['is_protected'] ?? false;
-    }
-
-    protected function getPasswordForm(array $record): ?array
-    {
-        if ($this->shouldRequirePassword($record)) {
-            return [
-                TextInput::make('password')
-                    ->password()
-                    ->revealable()
-                    ->required()
-                    ->maxLength(255),
-            ];
-        }
-        return null;
-    }
-
-    protected function handleFolderAction(array $record, array $data)
-    {
-        if ($this->shouldRequirePassword($record)) {
-            if (!isset($data['password']) || $data['password'] !== $record['password']) {
-                Notification::make()
-                    ->title('Password is incorrect')
-                    ->danger()
-                    ->send();
-
-                return;
-            }
-            session()->put('folder_password', $data['password']);
-        }
-
-        return $this->redirectToCorrectLocation($record);
-    }
-
-    protected function redirectToCorrectLocation(array $record)
-    {
-        $folder = Folder::find($record['id']);
-
-        // Check if this folder has children - if yes, navigate into it
-        if ($folder && $folder->folders()->exists()) {
-            return redirect(
-                FolderResource::getUrl('index', ['parent_id' => $folder->id])
-            );
-        }
-
-        // If no children, this is probably a media folder - navigate to media
-        $folderName = $record['name'];
-        return redirect(
-            FolderResource::getUrl('media', ['folderName' => $folderName])
-        );
     }
 }
