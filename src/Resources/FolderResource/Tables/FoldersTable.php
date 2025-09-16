@@ -43,12 +43,12 @@ class FoldersTable
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label(trans('filament-media-manager::messages.folders.columns.name'))
-                    ->sortable()
+                    // ->sortable()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('depth')
                     ->label('Level')
-                    ->sortable()
-                    ->toggleable()
+                    // ->sortable()
+                    // ->toggleable()
                     ->badge()
                     ->color(fn ($state) => match (true) {
                         $state == 0 => 'primary',
@@ -58,12 +58,12 @@ class FoldersTable
                 Tables\Columns\TextColumn::make('parent.name')
                     ->label('Parent Folder')
                     ->searchable()
-                    ->toggleable()
+                    // ->toggleable()
                     ->placeholder('Root Level'),
                 Tables\Columns\TextColumn::make('path')
                     ->label('Full Path')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    // ->toggleable(isToggledHiddenByDefault: true)
                     ->wrap(),
             ])
             ->defaultPaginationPageOption(12)
@@ -117,16 +117,16 @@ class FoldersTable
                     ->color('gray')
             ])
             ->bulkActions([
-                \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make()
-                        ->visible(fn () => hexa()->can('folder.delete'))
-                        ->before(function ($records) {
-                            // Clean up hierarchy for bulk delete
-                            foreach ($records as $record) {
-                                $record->folders()->delete();
-                            }
-                        }),
-                ]),
+                // \Filament\Actions\BulkActionGroup::make([
+                //     \Filament\Actions\DeleteBulkAction::make()
+                //         ->visible(fn () => hexa()->can('folder.delete'))
+                //         ->before(function ($records) {
+                //             // Clean up hierarchy for bulk delete
+                //             foreach ($records as $record) {
+                //                 $record->folders()->delete();
+                //             }
+                //         }),
+                // ]),
             ]);
     }
 }

@@ -1192,8 +1192,8 @@
 /* View Toggle Buttons */
 .view-toggle-container {
     display: flex;
-    background: var(--gray-100);
-    border-radius: var(--rounded);
+    background: var(--primary);
+    border-radius: 0.5rem;
     padding: 2px;
     border: 1px solid var(--mm-border-medium);
 }
@@ -1502,6 +1502,243 @@
 }
 
 /* ====================================
+   ADVANCED UX COMPONENTS
+   ==================================== */
+
+/* Enhanced Select All Component */
+.select-all-container.advanced-select {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-sm);
+    padding: var(--mm-space-sm) var(--mm-space-md);
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border);
+    border-radius: calc(var(--mm-radius) + 2px);
+    transition: var(--mm-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.select-all-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-sm);
+    position: relative;
+}
+
+.select-all-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: var(--mm-radius);
+    border: 2px solid var(--mm-border);
+    background: var(--mm-background);
+    cursor: pointer;
+    position: relative;
+    transition: var(--mm-transition);
+}
+
+.select-all-visual {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.select-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--mm-transition);
+}
+
+/* Select All States */
+.select-all-container.select-none {
+    background: var(--mm-background);
+    border-color: var(--mm-border);
+}
+
+.select-all-container.select-none .select-all-checkbox {
+    border-color: var(--mm-border);
+}
+
+.select-all-container.select-none .select-none-icon {
+    color: var(--mm-muted-foreground);
+}
+
+.select-all-container.select-partial {
+    background: linear-gradient(135deg, var(--mm-primary) 0%, var(--mm-accent) 100%);
+    border-color: var(--mm-primary);
+    color: white;
+}
+
+.select-all-container.select-partial .select-all-checkbox {
+    background: var(--mm-primary);
+    border-color: var(--mm-primary);
+}
+
+.select-all-container.select-partial .select-partial-icon {
+    color: white;
+}
+
+.select-all-container.select-all {
+    background: var(--mm-primary);
+    border-color: var(--mm-primary);
+    color: white;
+}
+
+.select-all-container.select-all .select-all-checkbox {
+    background: var(--mm-primary);
+    border-color: var(--mm-primary);
+}
+
+.select-all-container.select-all .select-all-icon {
+    color: white;
+}
+
+.select-all-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--mm-transition);
+}
+
+.selection-counter {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    backdrop-filter: blur(4px);
+}
+
+.select-all-container.select-none .selection-counter {
+    background: var(--mm-primary);
+    color: white;
+}
+
+/* Enhanced View Toggle Component */
+.view-toggle-container.enhanced-toggle {
+    position: relative;
+}
+
+.toggle-wrapper {
+    display: flex;
+    background: var(--mm-card);
+    border: 1px solid var(--mm-border);
+    border-radius: calc(var(--mm-radius) + 4px);
+    padding: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.view-toggle-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-xs);
+    padding: var(--mm-space-sm) var(--mm-space-md);
+    border: none;
+    background: transparent;
+    color: var(--mm-muted-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--mm-transition);
+    border-radius: var(--mm-radius);
+    z-index: 2;
+}
+
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-xs);
+    z-index: 3;
+    position: relative;
+}
+
+.toggle-icon {
+    width: 16px;
+    height: 16px;
+    transition: var(--mm-transition);
+}
+
+.toggle-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.btn-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--mm-primary) 0%, var(--mm-accent) 100%);
+    border-radius: var(--mm-radius);
+    z-index: 1;
+    transform: scale(0.95);
+    transition: var(--mm-transition);
+}
+
+.view-toggle-btn.active {
+    color: white;
+    transform: translateY(-1px);
+}
+
+.view-toggle-btn.active .btn-indicator {
+    transform: scale(1);
+    box-shadow: var(--mm-shadow-md);
+}
+
+.view-toggle-btn.inactive {
+    color: var(--mm-muted-foreground);
+}
+
+.view-toggle-btn:hover:not(.active) {
+    color: var(--mm-foreground);
+    background: var(--mm-muted);
+}
+
+.view-toggle-btn:focus {
+    outline: 2px solid var(--mm-ring);
+    outline-offset: 2px;
+}
+
+/* Enhanced animations */
+@keyframes selectCounterPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.selection-counter {
+    animation: selectCounterPulse 0.3s ease-out;
+}
+
+/* Hover effects for advanced components */
+.select-all-container.advanced-select:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--mm-shadow-md);
+}
+
+.view-toggle-container.enhanced-toggle:hover .toggle-wrapper {
+    box-shadow: var(--mm-shadow-sm);
+}
+
+/* ====================================
    RESPONSIVE DESIGN
    ==================================== */
 
@@ -1563,5 +1800,18 @@
     .list-col:nth-child(3),
     .list-col:nth-child(4) {
         display: none;
+    }
+
+    /* Mobile responsive for advanced components */
+    .select-all-container.advanced-select {
+        padding: var(--mm-space-xs) var(--mm-space-sm);
+    }
+
+    .toggle-label {
+        display: none;
+    }
+
+    .view-toggle-btn {
+        padding: var(--mm-space-sm);
     }
 }
