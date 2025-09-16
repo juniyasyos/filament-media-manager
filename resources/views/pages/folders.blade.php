@@ -1,208 +1,30 @@
 @php
-    // Optimize by caching frequently accessed data
+    // Simplified data preparation
     $currentParent = $this->currentParent ?? null;
     $parentId = request()->get('parent_id');
-    $viewMode = session('folder_view_mode', 'grid'); // grid or list
-
-    // Pre-load parent relationship to avoid N+1 queries
-    $parentWithRelations = $currentParent?->load('parent');
+    $viewMode = session('folder_view_mode', 'grid');
 @endphp
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('vendor/filament-media-manager/css/gdrive-style.css') }}">
 @endpush
 
-<script>
-    /**
-     * Inline Alpine.js Folder Manager Component (for immediate availability)
-     */
-    window.folderManager = function() {
-        return {
-            // State
-            selectedItems: new Set(),
-            viewMode: '{{ $viewMode }}',
-            totalItems: {{ count($records) }},
-            selectAll: false,
-            folderSelected: false,
-            searchQuery: '',
+@push('scripts')
+    <script src="{{ asset('vendor/filament-media-manager/js/folder-manager.js') }}"></script>
+@endpush
 
-            // Initialize
-            init() {
-                console.log('Folder Manager initialized with viewMode:', this.viewMode);
-                this.updateTotalItems();
-            },
-
-            // Selection Methods
-            toggleFolder(folderId) {
-                if (this.selectedItems.has(folderId)) {
-                    this.selectedItems.delete(folderId);
-                } else {
-                    this.selectedItems.add(folderId);
-                }
-                this.updateSelectAllState();
-            },
-
-            toggleSelectAll() {
-                const totalFolders = document.querySelectorAll('[data-folder-id]').length;
-
-                if (this.selectedItems.size === 0) {
-                    // Select all items
-                    document.querySelectorAll('[data-folder-id]').forEach(element => {
-                        const folderId = element.getAttribute('data-folder-id');
-                        this.selectedItems.add(folderId);
-                    });
-                    this.selectAll = true;
-                } else if (this.selectedItems.size === totalFolders) {
-                    // Deselect all items
-                    this.selectedItems.clear();
-                    this.selectAll = false;
-                } else {
-                    // Partial selection - select remaining items
-                    document.querySelectorAll('[data-folder-id]').forEach(element => {
-                        const folderId = element.getAttribute('data-folder-id');
-                        this.selectedItems.add(folderId);
-                    });
-                    this.selectAll = true;
-                }
-            },
-
-            updateSelectAllState() {
-                const totalFolders = document.querySelectorAll('[data-folder-id]').length;
-                this.selectAll = this.selectedItems.size === totalFolders && totalFolders > 0;
-            },
-
-            // Advanced UX helpers
-            get selectAllState() {
-                const totalFolders = document.querySelectorAll('[data-folder-id]').length;
-                if (this.selectedItems.size === 0) return 'none';
-                if (this.selectedItems.size === totalFolders) return 'all';
-                return 'partial';
-            },
-
-            get selectAllLabel() {
-                const state = this.selectAllState;
-                const count = this.selectedItems.size;
-                const total = document.querySelectorAll('[data-folder-id]').length;
-
-                switch (state) {
-                    case 'none':
-                        return 'Select all';
-                    case 'partial':
-                        return `Select all (${count}/${total})`;
-                    case 'all':
-                        return 'Deselect all';
-                    default:
-                        return 'Select all';
-                }
-            },
-
-            clearSelection() {
-                this.selectedItems.clear();
-                this.selectAll = false;
-            },
-
-            updateTotalItems() {
-                this.totalItems = document.querySelectorAll('[data-folder-id]').length;
-            },
-
-            // View Mode Methods
-            setViewMode(mode) {
-                this.viewMode = mode;
-                this.clearSelection();
-            },
-
-            // Action Methods
-            bulkDelete() {
-                if (this.selectedItems.size === 0) return;
-
-                if (confirm(`Are you sure you want to delete ${this.selectedItems.size} folder(s)?`)) {
-                    console.log('Bulk delete:', Array.from(this.selectedItems));
-                    this.performBulkAction('delete', Array.from(this.selectedItems));
-                }
-            },
-
-            bulkEdit() {
-                if (this.selectedItems.size === 0) return;
-                console.log('Bulk edit:', Array.from(this.selectedItems));
-                this.performBulkAction('edit', Array.from(this.selectedItems));
-            },
-
-            bulkMove() {
-                if (this.selectedItems.size === 0) return;
-                console.log('Bulk move:', Array.from(this.selectedItems));
-                this.performBulkAction('move', Array.from(this.selectedItems));
-            },
-
-            // Individual Action Methods
-            editFolder(folderId) {
-                console.log('Edit folder:', folderId);
-            },
-
-            deleteFolder(folderId) {
-                if (confirm('Are you sure you want to delete this folder?')) {
-                    console.log('Delete folder:', folderId);
-                    this.performAction('delete', folderId);
-                }
-            },
-
-            moveFolder(folderId) {
-                console.log('Move folder:', folderId);
-                this.performAction('move', folderId);
-            },
-
-            duplicateFolder(folderId) {
-                console.log('Duplicate folder:', folderId);
-                this.performAction('duplicate', folderId);
-            },
-
-            // Helper Methods
-            performBulkAction(action, folderIds) {
-                console.log(`Performing bulk ${action} on:`, folderIds);
-            },
-
-            performAction(action, folderId) {
-                console.log(`Performing ${action} on folder:`, folderId);
-            },
-
-            handleFolderClick(event) {
-                if (event.target.closest('.folder-selection') ||
-                    event.target.closest('.folder-actions-menu') ||
-                    event.target.closest('.list-actions-menu') ||
-                    event.target.closest('.folder-checkbox')) {
-                    event.preventDefault();
-                    return false;
-                }
-                return true;
-            },
-
-            // Search Methods
-            filterFolders() {
-                const query = this.searchQuery.toLowerCase();
-                document.querySelectorAll('[data-folder-name]').forEach(item => {
-                    const name = item.getAttribute('data-folder-name');
-                    if (name.includes(query)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-        }
-    };
-</script>
-
-<div class="gdrive-content" x-data="folderManager()" x-init="init()">
+<div class="gdrive-content" x-data="folderManager()" x-init="init()" data-view-mode="{{ $viewMode }}">
     <!-- Header Section -->
     <div class="gdrive-header">
         <!-- Breadcrumb Navigation -->
         @if ($currentParent || $parentId)
             <div class="breadcrumb-section">
                 <div class="breadcrumb-content">
-                    @if ($parentWithRelations && $parentWithRelations->parent)
-                        <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('index', ['parent_id' => $parentWithRelations->parent->id]) }}"
+                    @if ($currentParent && $currentParent->parent_id)
+                        <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('index', ['parent_id' => $currentParent->parent_id]) }}"
                             class="back-button">
                             <x-filament::icon icon="heroicon-o-chevron-left" class="back-icon" />
-                            Back to {{ $parentWithRelations->parent->name }}
+                            Back to Parent
                         </a>
                     @elseif($currentParent)
                         <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('index') }}"
@@ -216,9 +38,6 @@
                         <div class="current-folder">
                             <x-filament::icon icon="heroicon-o-folder" class="current-folder-icon" />
                             <span class="current-folder-name">{{ $currentParent->name }}</span>
-                            @if ($currentParent->path)
-                                <span class="current-folder-path">{{ $currentParent->path }}</span>
-                            @endif
                         </div>
                     @endif
                 </div>
@@ -227,123 +46,73 @@
 
         <!-- Toolbar -->
         <div class="toolbar">
-            <!-- Selection Actions Bar -->
-            <div class="selection-actions-bar" x-show="selectedItems.size > 0"
+            <!-- Selection Bar (when items selected) -->
+            <div class="selection-bar-top" x-show="selectedItems.size > 0"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 transform -translate-y-4"
                 x-transition:enter-end="opacity-100 transform translate-y-0">
-                <div class="selection-info">
-                    <span x-text="selectedItems.size"></span> selected
+
+                <!-- Selection Info -->
+                <div class="selection-info-top">
+                    <span class="selection-count-top" x-text="selectedItems.size"></span>
+                    <span class="selection-text-top">selected</span>
                 </div>
-                <div class="selection-actions">
-                    <button class="action-btn action-btn-danger" @click="bulkDelete()"
-                        :disabled="selectedItems.size === 0">
-                        <x-filament::icon icon="heroicon-o-trash" class="action-icon" />
-                        Delete
+
+                <!-- Action Buttons -->
+                <div class="selection-actions-top">
+                    <button class="top-btn btn-select-all" @click="toggleSelectAll()" title="Toggle Select All">
+                        <x-filament::icon icon="heroicon-o-check-circle" class="btn-icon" />
+                        <span>Select All</span>
                     </button>
-                    <button class="action-btn action-btn-primary" @click="bulkEdit()"
-                        :disabled="selectedItems.size === 0">
-                        <x-filament::icon icon="heroicon-o-pencil" class="action-icon" />
-                        Edit
+
+                    <button class="top-btn btn-edit" @click="bulkEdit()" title="Edit">
+                        <x-filament::icon icon="heroicon-o-pencil" class="btn-icon" />
+                        <span>Edit</span>
                     </button>
-                    <button class="action-btn action-btn-secondary" @click="bulkMove()"
-                        :disabled="selectedItems.size === 0">
-                        <x-filament::icon icon="heroicon-o-arrow-right" class="action-icon" />
-                        Move
+
+                    <button class="top-btn btn-move" @click="bulkMove()" title="Move">
+                        <x-filament::icon icon="heroicon-o-arrow-right" class="btn-icon" />
+                        <span>Move</span>
                     </button>
-                    <button class="action-btn action-btn-ghost" @click="clearSelection()">
-                        <x-filament::icon icon="heroicon-o-x-mark" class="action-icon" />
-                        Clear
+
+                    <button class="top-btn btn-delete" @click="bulkDelete()" title="Delete">
+                        <x-filament::icon icon="heroicon-o-trash" class="btn-icon" />
+                        <span>Delete</span>
                     </button>
                 </div>
+
+                <!-- Clear Selection -->
+                <button class="clear-btn-top" @click="clearSelection()" title="Clear selection">
+                    <x-filament::icon icon="heroicon-o-x-mark" class="clear-icon" />
+                </button>
             </div>
 
-            <!-- Default Toolbar -->
+            <!-- Default Toolbar (when no selection) -->
             <div class="default-toolbar" x-show="selectedItems.size === 0">
-                <!-- Left Side: Search and Sort -->
-                <div class="toolbar-left">
-                    <!-- Search Box -->
-                    {{-- <div class="search-container">
-                    <x-filament::icon icon="heroicon-o-magnifying-glass" class="search-icon" />
-                    <input type="search" placeholder="Search folders..." class="mm-search-input" id="folder-search">
-                </div> --}}
+                <!-- Main Actions -->
+                <div class="toolbar-actions">
+                    <button class="action-btn primary-btn">
+                        <x-filament::icon icon="heroicon-o-folder-plus" class="btn-icon" />
+                        <span>New Folder</span>
+                    </button>
 
-                    <!-- Sort Dropdown -->
-                    {{-- <div class="sort-container">
-                    <select class="mm-select">
-                        <option value="name">Sort by Name</option>
-                        <option value="date">Sort by Date</option>
-                        <option value="size">Sort by Size</option>
-                    </select>
-                    <x-filament::icon icon="heroicon-o-chevron-down" class="sort-icon" />
-                </div> --}}
+                    <button class="action-btn secondary-btn">
+                        <x-filament::icon icon="heroicon-o-arrow-up-tray" class="btn-icon" />
+                        <span>Upload</span>
+                    </button>
                 </div>
 
-                <!-- Right Side: View Toggle -->
-                <div class="toolbar-right">
-                    <!-- Advanced Select All Container -->
-                    <div class="select-all-container advanced-select"
-                        :class="{
-                            'select-none': selectAllState === 'none',
-                            'select-partial': selectAllState === 'partial',
-                            'select-all': selectAllState === 'all'
-                        }">
-                        <div class="select-all-wrapper">
-                            <input type="checkbox" class="mm-checkbox select-all-checkbox"
-                                :checked="selectAllState === 'all'" :indeterminate="selectAllState === 'partial'"
-                                @change="toggleSelectAll()" id="select-all-checkbox"
-                                style="appearance:none;-webkit-appearance:none;-moz-appearance:none;">
-                            <div class="select-all-visual">
-                                <!-- None State Icon -->
-                                <div class="select-icon select-none-icon" x-show="selectAllState === 'none'">
-                                    <x-filament::icon icon="heroicon-o-square-2-stack" class="w-4 h-4" />
-                                </div>
-                                <!-- Partial State Icon -->
-                                <div class="select-icon select-partial-icon" x-show="selectAllState === 'partial'">
-                                    <x-filament::icon icon="heroicon-o-minus" class="w-4 h-4" />
-                                </div>
-                                <!-- All State Icon -->
-                                <div class="select-icon select-all-icon" x-show="selectAllState === 'all'">
-                                    <x-filament::icon icon="heroicon-o-check" class="w-4 h-4" />
-                                </div>
-                            </div>
-                            <label class="select-all-label" for="select-all-checkbox" x-text="selectAllLabel"></label>
-                        </div>
-
-                        <!-- Selection Counter Badge -->
-                        <div class="selection-counter" x-show="selectedItems.size > 0" x-transition>
-                            <span class="counter-text" x-text="selectedItems.size"></span>
-                        </div>
-                    </div>
-
-                    <!-- Enhanced View Mode Toggle -->
-                    <div class="view-toggle-container enhanced-toggle">
-                        <div class="toggle-wrapper">
-                            <button class="view-toggle-btn grid-btn"
-                                :class="{
-                                    'active': viewMode === 'grid',
-                                    'inactive': viewMode !== 'grid'
-                                }"
-                                @click="setViewMode('grid')" :aria-pressed="viewMode === 'grid'">
-                                <div class="btn-content">
-                                    <x-filament::icon icon="heroicon-o-squares-2x2" class="toggle-icon" />
-                                    <span class="toggle-label">Grid</span>
-                                </div>
-                                <div class="btn-indicator" x-show="viewMode === 'grid'"></div>
-                            </button>
-                            <button class="view-toggle-btn list-btn"
-                                :class="{
-                                    'active': viewMode === 'list',
-                                    'inactive': viewMode !== 'list'
-                                }"
-                                @click="setViewMode('list')" :aria-pressed="viewMode === 'list'">
-                                <div class="btn-content">
-                                    <x-filament::icon icon="heroicon-o-bars-3" class="toggle-icon" />
-                                    <span class="toggle-label">List</span>
-                                </div>
-                                <div class="btn-indicator" x-show="viewMode === 'list'"></div>
-                            </button>
-                        </div>
+                <!-- View Controls -->
+                <div class="toolbar-controls">
+                    <div class="view-toggle">
+                        <button class="view-toggle-btn" :class="{ 'active': viewMode === 'grid' }"
+                                @click="setViewMode('grid')" title="Grid View">
+                            <x-filament::icon icon="heroicon-o-squares-2x2" class="toggle-icon" />
+                        </button>
+                        <button class="view-toggle-btn" :class="{ 'active': viewMode === 'list' }"
+                                @click="setViewMode('list')" title="List View">
+                            <x-filament::icon icon="heroicon-o-list-bullet" class="toggle-icon" />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -375,7 +144,7 @@
                                 <!-- Selection Checkbox -->
                                 <div class="folder-selection">
                                     <input type="checkbox" class="folder-checkbox mm-checkbox"
-                                        x-model="folderSelected" @change="toggleFolder('{{ $item->id }}')"
+                                        @change="toggleFolder('{{ $item->id }}')"
                                         :checked="selectedItems.has('{{ $item->id }}')">
                                 </div>
 
@@ -513,11 +282,11 @@
                                     <div class="list-col">
                                         <div class="list-item-info">
                                             <input type="checkbox" class="folder-checkbox mm-checkbox"
-                                                x-model="folderSelected"
                                                 @change="toggleFolder('{{ $item->id }}')"
                                                 :checked="selectedItems.has('{{ $item->id }}')" @click.stop>
-                                            <x-filament::icon :icon="$item->icon ?? 'heroicon-o-folder'" class="list-folder-icon"
-                                                style="color: {{ $item->color ?? '#3B82F6' }}" />
+                                            <x-filament::icon :icon="$item->icon ?? 'heroicon-o-folder'"
+                                                class="list-folder-icon"
+                                                :style="$item->color ? 'color: ' . $item->color : ''" />
                                             <div class="item-details">
                                                 <h3 class="item-name">{{ $item->name }}</h3>
                                                 @if ($item->description)

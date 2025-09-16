@@ -1,53 +1,63 @@
 /**
- * Alpine.js Folder Manager Component
- * Manages folder selection, actions, and view modes
+ * Optimized Alpine.js Folder Manager Component
+ * Clean separation of concerns from blade template
  */
 function folderManager() {
     return {
-        // State
         selectedItems: new Set(),
-        viewMode: 'grid', // Will be set from PHP
+        viewMode: 'grid',
         totalItems: 0,
         selectAll: false,
-        folderSelected: false,
-        searchQuery: '',
 
-        // Initialize
         init() {
-            console.log('Folder Manager initialized with viewMode:', this.viewMode);
             this.updateTotalItems();
+            this.setupWatchers();
+            this.viewMode = this.$el.dataset.viewMode || 'grid';
         },
 
-        // Selection Methods
+        setupWatchers() {
+            this.$watch('selectedItems', () => {
+                this.updateBodyClass();
+                this.updateSelectAllState();
+            });
+        },
+
+        updateBodyClass() {
+            document.body.classList.toggle('selection-active', this.selectedItems.size > 0);
+        },
+
         toggleFolder(folderId) {
             if (this.selectedItems.has(folderId)) {
                 this.selectedItems.delete(folderId);
             } else {
                 this.selectedItems.add(folderId);
             }
-            this.updateSelectAllState();
+            this.selectedItems = new Set(this.selectedItems);
         },
 
         toggleSelectAll() {
-            if (this.selectAll) {
-                // Select all folders
-                document.querySelectorAll('[data-folder-id]').forEach(element => {
-                    const folderId = element.getAttribute('data-folder-id');
-                    this.selectedItems.add(folderId);
-                });
-            } else {
-                // Deselect all folders
+            const allFolders = document.querySelectorAll('[data-folder-id]');
+            const totalFolders = allFolders.length;
+
+            if (this.selectedItems.size === totalFolders && totalFolders > 0) {
                 this.selectedItems.clear();
+            } else {
+                this.selectedItems.clear();
+                allFolders.forEach(element => {
+                    this.selectedItems.add(element.getAttribute('data-folder-id'));
+                });
             }
+            this.selectedItems = new Set(this.selectedItems);
         },
 
         updateSelectAllState() {
             const totalFolders = document.querySelectorAll('[data-folder-id]').length;
-            this.selectAll = this.selectedItems.size === totalFolders;
+            this.selectAll = this.selectedItems.size === totalFolders && totalFolders > 0;
         },
 
         clearSelection() {
             this.selectedItems.clear();
+            this.selectedItems = new Set();
             this.selectAll = false;
         },
 
@@ -55,142 +65,67 @@ function folderManager() {
             this.totalItems = document.querySelectorAll('[data-folder-id]').length;
         },
 
-        // View Mode Methods
         setViewMode(mode) {
             this.viewMode = mode;
-            this.clearSelection(); // Clear selection when switching views
+            this.clearSelection();
         },
 
-        // Action Methods
         bulkDelete() {
             if (this.selectedItems.size === 0) return;
-
             if (confirm(`Are you sure you want to delete ${this.selectedItems.size} folder(s)?`)) {
-                console.log('Bulk delete:', Array.from(this.selectedItems));
-                // TODO: Implement actual delete logic
-                // Example: Call Laravel route with selected IDs
                 this.performBulkAction('delete', Array.from(this.selectedItems));
             }
         },
 
         bulkEdit() {
             if (this.selectedItems.size === 0) return;
-
-            console.log('Bulk edit:', Array.from(this.selectedItems));
-            // TODO: Implement bulk edit modal/form
             this.performBulkAction('edit', Array.from(this.selectedItems));
         },
 
         bulkMove() {
             if (this.selectedItems.size === 0) return;
-
-            console.log('Bulk move:', Array.from(this.selectedItems));
-            // TODO: Implement move to folder selection
             this.performBulkAction('move', Array.from(this.selectedItems));
         },
 
-        // Individual Action Methods
         editFolder(folderId) {
-            console.log('Edit folder:', folderId);
-            // TODO: Implement edit logic
-            // Example: Open edit modal or navigate to edit page
+            this.performAction('edit', folderId);
         },
 
         deleteFolder(folderId) {
             if (confirm('Are you sure you want to delete this folder?')) {
-                console.log('Delete folder:', folderId);
-                // TODO: Implement delete logic
                 this.performAction('delete', folderId);
             }
         },
 
         moveFolder(folderId) {
-            console.log('Move folder:', folderId);
-            // TODO: Implement move logic
             this.performAction('move', folderId);
         },
 
         duplicateFolder(folderId) {
-            console.log('Duplicate folder:', folderId);
-            // TODO: Implement duplicate logic
             this.performAction('duplicate', folderId);
         },
 
-        // Helper Methods
         performBulkAction(action, folderIds) {
-            // TODO: Implement actual API calls
             console.log(`Performing bulk ${action} on:`, folderIds);
-
-            // Example implementation:
-            // fetch('/api/folders/bulk-action', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            //     },
-            //     body: JSON.stringify({
-            //         action: action,
-            //         folder_ids: folderIds
-            //     })
-            // }).then(response => {
-            //     if (response.ok) {
-            //         this.clearSelection();
-            //         location.reload(); // Or update UI dynamically
-            //     }
-            // });
         },
 
         performAction(action, folderId) {
-            // TODO: Implement actual API calls
             console.log(`Performing ${action} on folder:`, folderId);
-
-            // Example implementation:
-            // fetch(`/api/folders/${folderId}/${action}`, {
-            //     method: action === 'delete' ? 'DELETE' : 'POST',
-            //     headers: {
-            //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            //     }
-            // }).then(response => {
-            //     if (response.ok) {
-            //         location.reload(); // Or update UI dynamically
-            //     }
-            // });
         },
 
         handleFolderClick(event) {
-            // Prevent navigation if clicking on controls
-            if (event.target.closest('.folder-selection') ||
-                event.target.closest('.folder-actions-menu') ||
-                event.target.closest('.list-actions-menu') ||
-                event.target.closest('.folder-checkbox')) {
+            const isInteractive = event.target.closest('.folder-selection') ||
+                                 event.target.closest('.folder-actions-menu') ||
+                                 event.target.closest('.list-actions-menu') ||
+                                 event.target.closest('.folder-checkbox');
+
+            if (isInteractive) {
                 event.preventDefault();
                 return false;
             }
-            // Allow normal navigation
             return true;
-        },
-
-        // Search Methods
-        filterFolders() {
-            const query = this.searchQuery.toLowerCase();
-            document.querySelectorAll('[data-folder-name]').forEach(item => {
-                const name = item.getAttribute('data-folder-name');
-                if (name.includes(query)) {
-                    item.style.display = '';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        },
-
-        // Watchers
-        $watch: {
-            searchQuery() {
-                this.filterFolders();
-            }
         }
-    }
+    };
 }
 
-// Make function available globally for Alpine.js
 window.folderManager = folderManager;
