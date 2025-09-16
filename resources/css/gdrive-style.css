@@ -50,6 +50,410 @@
 }
 
 /* ===================================
+   SELECTION SYSTEM & ACTIONS
+   =================================== */
+
+/* Selection Actions Bar */
+.selection-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--mm-space-md) var(--mm-space-lg);
+    background-color: var(--mm-primary);
+    color: white;
+    border-radius: var(--mm-radius);
+    margin-bottom: var(--mm-space-md);
+    box-shadow: var(--mm-shadow-md);
+    transition: var(--mm-transition);
+}
+
+.selection-info {
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.selection-actions {
+    display: flex;
+    gap: var(--mm-space-sm);
+}
+
+/* Action Buttons */
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-xs);
+    padding: var(--mm-space-xs) var(--mm-space-md);
+    border-radius: var(--mm-radius);
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--mm-transition);
+}
+
+.action-btn-danger {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #DC2626;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-btn-danger:hover {
+    background-color: rgba(239, 68, 68, 0.3);
+}
+
+.action-btn-primary {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #2563EB;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.action-btn-primary:hover {
+    background-color: rgba(59, 130, 246, 0.3);
+}
+
+.action-btn-secondary {
+    background-color: rgba(107, 114, 128, 0.2);
+    color: #374151;
+    border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+.action-btn-secondary:hover {
+    background-color: rgba(107, 114, 128, 0.3);
+}
+
+.action-btn-ghost {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.action-btn-ghost:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.action-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Select All Container */
+.select-all-container {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-xs);
+}
+
+.select-all-label {
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+    cursor: pointer;
+}
+
+/* ===================================
+   FOLDER SELECTION & VISUAL FEEDBACK
+   =================================== */
+
+/* Folder Item Wrapper */
+.folder-item-wrapper,
+.list-item-wrapper {
+    position: relative;
+    transition: var(--mm-transition);
+    border-radius: var(--mm-radius);
+}
+
+/* Selected State */
+.folder-item-wrapper.selected,
+.list-item-wrapper.selected {
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 2px solid var(--mm-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.folder-item-wrapper:hover,
+.list-item-wrapper:hover {
+    background-color: var(--mm-muted);
+}
+
+/* Folder Selection Checkbox */
+.folder-selection {
+    position: absolute;
+    top: var(--mm-space-sm);
+    left: var(--mm-space-sm);
+    z-index: 10;
+    background-color: var(--mm-card);
+    border-radius: 50%;
+    padding: var(--mm-space-xs);
+    box-shadow: var(--mm-shadow-sm);
+    opacity: 0;
+    transition: var(--mm-transition);
+}
+
+.folder-item-wrapper:hover .folder-selection,
+.folder-item-wrapper.selected .folder-selection {
+    opacity: 1;
+}
+
+/* Three-dot Menu */
+.folder-actions-menu,
+.list-actions-menu {
+    position: absolute;
+    top: var(--mm-space-sm);
+    right: var(--mm-space-sm);
+    z-index: 10;
+}
+
+.three-dot-btn {
+    background-color: var(--mm-card);
+    border: none;
+    border-radius: 50%;
+    padding: var(--mm-space-xs);
+    cursor: pointer;
+    box-shadow: var(--mm-shadow-sm);
+    opacity: 0;
+    transition: var(--mm-transition);
+}
+
+.three-dot-btn:hover {
+    background-color: var(--mm-muted);
+}
+
+.folder-item-wrapper:hover .three-dot-btn,
+.list-item-wrapper:hover .three-dot-btn,
+.three-dot-btn.active {
+    opacity: 1;
+}
+
+.three-dot-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--mm-foreground);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--mm-card);
+    border: 1px solid var(--mm-border);
+    border-radius: var(--mm-radius);
+    box-shadow: var(--mm-shadow-lg);
+    padding: var(--mm-space-xs);
+    min-width: 140px;
+    z-index: 20;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: var(--mm-transition);
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--mm-space-xs);
+    width: 100%;
+    padding: var(--mm-space-xs) var(--mm-space-sm);
+    border: none;
+    background: none;
+    text-align: left;
+    font-size: 0.875rem;
+    color: var(--mm-foreground);
+    cursor: pointer;
+    border-radius: calc(var(--mm-radius) - 2px);
+    transition: var(--mm-transition);
+}
+
+.dropdown-item:hover {
+    background-color: var(--mm-muted);
+}
+
+.dropdown-item.danger:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #DC2626;
+}
+
+.dropdown-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* List View Specific */
+.list-item-wrapper {
+    border-bottom: 1px solid var(--mm-border);
+}
+
+.list-row-link {
+    display: flex;
+    padding: var(--mm-space-md);
+    text-decoration: none;
+    color: inherit;
+}
+
+.list-actions-menu {
+    position: absolute;
+    top: 50%;
+    right: var(--mm-space-md);
+    transform: translateY(-50%);
+}
+
+/* Responsive Design for Selection & Actions */
+@media (max-width: 640px) {
+    .selection-actions-bar {
+        flex-direction: column;
+        gap: var(--mm-space-md);
+        align-items: stretch;
+    }
+
+    .selection-actions {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        flex: 1;
+        min-width: calc(50% - var(--mm-space-xs));
+        justify-content: center;
+    }
+
+    .dropdown-menu {
+        right: auto;
+        left: 0;
+        min-width: 120px;
+    }
+
+    .three-dot-btn {
+        padding: var(--mm-space-sm);
+    }
+
+    .folder-selection {
+        top: var(--mm-space-xs);
+        left: var(--mm-space-xs);
+    }
+
+    .folder-actions-menu {
+        top: var(--mm-space-xs);
+        right: var(--mm-space-xs);
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    .selection-actions {
+        gap: var(--mm-space-xs);
+    }
+
+    .action-btn {
+        padding: var(--mm-space-xs) var(--mm-space-sm);
+        font-size: 0.8rem;
+    }
+}
+
+/* Dark Mode Enhancements */
+.dark .selection-actions-bar {
+    background-color: hsl(var(--primary));
+}
+
+.dark .action-btn-danger {
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.dark .action-btn-primary {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.dark .action-btn-secondary {
+    background-color: rgba(107, 114, 128, 0.15);
+    border-color: rgba(107, 114, 128, 0.2);
+    color: hsl(var(--foreground));
+}
+
+.dark .dropdown-item:hover {
+    background-color: hsl(var(--muted));
+}
+
+/* Animation Enhancements */
+.folder-item-wrapper.selected {
+    animation: selectionPulse 0.3s ease-in-out;
+}
+
+@keyframes selectionPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.selection-actions-bar {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Focus States for Accessibility */
+.action-btn:focus,
+.three-dot-btn:focus,
+.dropdown-item:focus {
+    outline: 2px solid var(--mm-primary);
+    outline-offset: 2px;
+}
+
+.folder-checkbox:focus {
+    outline: 2px solid var(--mm-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Enhanced Hover States */
+.folder-item-wrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--mm-shadow-md);
+}
+
+.list-item-wrapper:hover {
+    background-color: var(--mm-muted);
+    border-left: 3px solid var(--mm-primary);
+}
+
+/* Loading States */
+.action-btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.action-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1rem;
+    height: 1rem;
+    margin: -0.5rem 0 0 -0.5rem;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
    MEDIA GRID AND CARDS
    =================================== */
 
