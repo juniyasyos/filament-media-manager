@@ -42,6 +42,11 @@
         "bezhansalleh/filament-shield": "^4.0",
         "filament/spatie-laravel-media-library-plugin": "^4.0",
         "nwidart/laravel-modules": "^12.0",
-        "filament/filament": "^4.0"
+        "filament/filament": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": true
+        }
     }
 }

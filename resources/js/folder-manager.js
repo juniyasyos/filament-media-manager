@@ -10,9 +10,13 @@ function folderManager() {
         selectAll: false,
 
         init() {
+            // Set viewMode immediately from data attribute
+            const el = this.$el;
+            this.viewMode = el.dataset.viewMode || 'grid';
+            console.log('Folder Manager initialized with viewMode:', this.viewMode);
+
             this.updateTotalItems();
             this.setupWatchers();
-            this.viewMode = this.$el.dataset.viewMode || 'grid';
         },
 
         setupWatchers() {
@@ -63,6 +67,7 @@ function folderManager() {
 
         updateTotalItems() {
             this.totalItems = document.querySelectorAll('[data-folder-id]').length;
+            console.log('Total items found:', this.totalItems);
         },
 
         setViewMode(mode) {

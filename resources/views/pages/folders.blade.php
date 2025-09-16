@@ -3,6 +3,7 @@
     $currentParent = $this->currentParent ?? null;
     $parentId = request()->get('parent_id');
     $viewMode = session('folder_view_mode', 'grid');
+    $records = method_exists($this, 'getRecords') ? $this->getRecords() : collect();
 @endphp
 
 @push('styles')
@@ -120,6 +121,13 @@
 
         <!-- Main Content -->
         <div class="gdrive-main-content">
+            @if(config('app.debug'))
+            <!-- Debug Info (only in debug mode) -->
+            <div class="text-xs bg-gray-100 p-2 mb-4 rounded">
+                Records: {{ count($records ?? []) }} | View: {{ $viewMode }}
+            </div>
+            @endif
+
             <!-- Grid View -->
             <div class="folders-grid" x-show="viewMode === 'grid'">
                 @if (count($records) > 0)

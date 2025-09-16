@@ -133,7 +133,8 @@ class FolderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListFolders::route('/'),
+            'index' => Pages\FoldersManager::route('/'),
+            'folders-manager' => Pages\FoldersManager::route('/folders'),
             'media' => \Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages\ListMedia::route('/media-name={folderName}'),
         ];
     }
