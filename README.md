@@ -165,7 +165,7 @@ please note that the `name ` of the component will be the same name of the colle
 
 ## Allow Sub Folders
 
-you can allow create and manage subfolders on your media manager on `/app/Providers/Filament/AdminPanelProvider.php`
+You can enable nested folder functionality (folders within folders) in your media manager on `/app/Providers/Filament/AdminPanelProvider.php`:
 
 ```php
 ->plugin(
@@ -173,6 +173,40 @@ you can allow create and manage subfolders on your media manager on `/app/Provid
         ->allowSubFolders()
 )
 ```
+
+### Nested Folder Features
+
+When enabled, the subfolder feature provides:
+
+1. **Hierarchical Folder Structure**: Create unlimited levels of nested folders
+2. **Breadcrumb Navigation**: Navigate through folder hierarchy with visual breadcrumbs
+3. **Parent Folder Context**: Subfolders inherit context from their parent folders
+4. **Back Navigation**: Quick navigation back to parent folder with dedicated button
+5. **Subfolder Indicator**: Visual badge showing the number of subfolders in each folder
+6. **Parent Folder Selection**: Choose parent folder when creating new folders via form selector
+
+### Creating Subfolders
+
+There are two ways to create subfolders:
+
+**Method 1: Navigate and Create**
+1. Navigate into a folder by clicking on it
+2. Click the "Create" button in the header
+3. The new folder will automatically be created as a subfolder
+
+**Method 2: Use Parent Folder Selector**
+1. Click "Create" from any folder view
+2. Select the parent folder from the "Parent Folder" dropdown
+3. The folder will be created under the selected parent
+
+### Navigation
+
+- Click on a folder with subfolders to navigate into it
+- Use the breadcrumb trail at the top to jump to any parent folder
+- Use the "Back to Parent" button in the header to go up one level
+- Root folders (without parent) are displayed when no parent filter is active
+
+**NOTE**: Don't forget to migrate after enabling this feature to add the `parent_id` column to the folders table.
 
 ## Allow User Access
 

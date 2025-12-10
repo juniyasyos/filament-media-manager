@@ -19,6 +19,16 @@ return [
             'is_protected' => 'Is Protected',
             'password' => 'Password',
             'password_confirmation' => 'Password Confirmation',
+            'parent_folder' => 'Parent Folder',
+        ],
+        'actions' => [
+            'back' => 'Back to Parent',
+            'create_subfolder' => 'Create Subfolder',
+        ],
+        'notifications' => [
+            'sub-folder-created' => 'Subfolder Created',
+            'sub-folder-created-body' => 'Subfolder has been created successfully',
+            'subfolder_created' => 'Subfolder created successfully',
         ],
         'group' => 'Content',
     ],

@@ -69,16 +69,22 @@ class CreateSubFolderAction
             ->action(function (array $data) use ($folder_id) {
                 $folder = Folder::find($folder_id);
                 if($folder){
-                    $data['user_id'] = auth()->user()->id;
-                    $data['user_type'] = get_class(auth()->user());
-                    $data['model_id'] = $folder_id;
-                    $data['model_type'] = Folder::class;
+                    $data['user_id'] = auth()->user()->id ?? null;
+                    $data['user_type'] = auth()->user() ? get_class(auth()->user()) : null;
+                    $data['parent_id'] = $folder_id;
+                    
+                    // Inherit model context from parent folder if exists
+                    if ($folder->model_type) {
+                        $data['model_type'] = $folder->model_type;
+                        $data['model_id'] = $folder->model_id;
+                    }
+                    
                     Folder::query()->create($data);
                 }
 
                 Notification::make()
-                    ->title('Folder Created')
-                    ->body('Folder Created Successfully')
+                    ->title(trans('filament-media-manager::messages.folders.notifications.sub-folder-created'))
+                    ->body(trans('filament-media-manager::messages.folders.notifications.sub-folder-created-body'))
                     ->success()
                     ->send();
             });

@@ -26,8 +26,14 @@ class FilamentMediaManagerInstall extends Command
     {
         $this->info('🔄 Generating migrations from stubs...');
 
-        // Path ke folder stub migrations
+        // Path ke folder stub migrations - support both vendor and local package
         $stubsPath = base_path('vendor/juniyasyos/filament-media-manager/stubs/migrations');
+
+        // Check if package is installed locally
+        if (!File::exists($stubsPath)) {
+            $stubsPath = base_path('packages/juniyasyos/filament-media-manager/stubs/migrations');
+        }
+
         $migrationPath = database_path('migrations');
 
         if (!File::exists($stubsPath)) {

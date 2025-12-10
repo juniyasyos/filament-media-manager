@@ -77,6 +77,18 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->visible(config('filament-media-manager.allow_user_access', false))
                     ->default(get_class(Auth::user())),
 
+                Forms\Components\Hidden::make('parent_id')
+                    ->default(fn() => request()->get('parent_id')),
+
+                Forms\Components\Select::make('parent_id')
+                    ->label(trans('filament-media-manager::messages.folders.columns.parent_folder'))
+                    // ->visible(fn() => dd(filament('filament-media-manager')->allowSubFolders))
+                    ->relationship('parent', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->columnSpanFull()
+                    ->placeholder('Root Folder'),
+
                 Forms\Components\TextInput::make('name')
                     ->label(trans('filament-media-manager::messages.folders.columns.name'))
                     ->columnSpanFull()
@@ -127,20 +139,38 @@ class FolderResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                if (request()->has('model_type') && !request()->has('collection')) {
+                // Filter by parent folder for nested folders
+                if (request()->has('parent_id')) {
+                    $query->where('parent_id', request()->get('parent_id'));
+                } else if (request()->has('model_type') && !request()->has('collection')) {
                     $query->where('model_type', request()->get('model_type'))
                         ->where('model_id', null)
-                        ->whereNotNull('collection');
+                        ->whereNotNull('collection')
+                        ->whereNull('parent_id');
                 } else if (request()->has('model_type') && request()->has('collection')) {
                     $query->where('model_type', request()->get('model_type'))
                         ->whereNotNull('model_id')
-                        ->where('collection', request()->get('collection'));
+                        ->where('collection', request()->get('collection'))
+                        ->whereNull('parent_id');
                 } else {
-                    $query->where('model_id', null)
-                        ->where('collection', null)->orWhere('model_type', null);
+                    // Show only root level folders (no parent)
+                    $query->whereNull('parent_id')
+                        ->where(function ($q) {
+                            $q->where(function ($subQ) {
+                                $subQ->whereNull('model_id')
+                                    ->whereNull('collection');
+                            })
+                                ->orWhereNull('model_type');
+                        });
                 }
 
-                // dd($query->get());
+                // Debug: uncomment untuk lihat query
+                // dd([
+                //     'parent_id' => request()->get('parent_id'),
+                //     'sql' => $query->toSql(),
+                //     'bindings' => $query->getBindings(),
+                //     'results_count' => $query->count()
+                // ]);
             })
             ->content(fn() => view('filament-media-manager::pages.folders'))
             ->columns([
