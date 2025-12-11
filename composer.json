@@ -44,7 +44,7 @@
         "filament/spatie-laravel-media-library-plugin": "^3.2",
         "nwidart/laravel-modules": "^12.0",
         "filament/filament": "^3.2",
-        "laravel/framework": "^12.0"
+        "laravel/framework": "^11.0|^12.0"
     },
     "require-dev": {
         "orchestra/testbench": "^9.0",
