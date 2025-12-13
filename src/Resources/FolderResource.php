@@ -235,7 +235,7 @@ class FolderResource extends Resource implements HasShieldPermissions
     {
         return [
             'index' => Pages\ListFolders::route('/'),
-            'media' => \Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages\ListMedia::route('/media-name={folderName}'),
+            'media' => \Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages\ListMedia::route('/{folder}/media'),
         ];
     }
 }

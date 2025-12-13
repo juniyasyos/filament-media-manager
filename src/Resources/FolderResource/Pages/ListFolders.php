@@ -228,51 +228,21 @@ class ListFolders extends ManageRecords
 
     protected function redirectToCorrectLocation(array $record)
     {
-        $folderName = $record['name'];
-        $folderId = $record['id'];
+        $folder = Folder::find($record['id']);
+
+        if (!$folder) {
+            abort(404, 'Folder not found');
+        }
 
         // Check if this folder has any subfolders
-        $hasSubfolders = Folder::where('parent_id', $folderId)->exists();
+        $hasSubfolders = Folder::where('parent_id', $folder->id)->exists();
 
-        // If nested folders are enabled OR folder has subfolders, navigate into it
+        // If nested folders are enabled OR folder has subfolders, navigate to view page
         if ($this->isSubfolderEnabled() || $hasSubfolders) {
-            return redirect(
-                FolderResource::getUrl('index', [
-                    'parent_id' => $folderId,
-                    'parent_name' => $folderName,
-                ])
-            );
+            return redirect(FolderResource::getUrl('view', ['folder' => $folder]));
         }
 
-        // Media root (jika folder tidak berasosiasi ke model)
-        if (!$record['model_type']) {
-            return redirect(
-                FolderResource::getUrl('media', ['folderName' => $folderName])
-            );
-        }
-
-        // Folder level berdasarkan model_type saja
-        if (!$record['model_id'] && !$record['collection']) {
-            return redirect(
-                FolderResource::getUrl('index', [
-                    'model_type' => $record['model_type'],
-                ])
-            );
-        }
-
-        // Folder level berdasarkan model_type dan collection
-        if (!$record['model_id']) {
-            return redirect(
-                FolderResource::getUrl('index', [
-                    'model_type' => $record['model_type'],
-                    'collection' => $record['collection'],
-                ])
-            );
-        }
-
-        // Media folder spesifik
-        return redirect(
-            FolderResource::getUrl('media', ['folderName' => $folderName])
-        );
+        // Otherwise, navigate to media page
+        return redirect(FolderResource::getUrl('media', ['folder' => $folder]));
     }
 }

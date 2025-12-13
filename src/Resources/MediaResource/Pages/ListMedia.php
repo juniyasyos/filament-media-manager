@@ -31,7 +31,6 @@ class ListMedia extends ManageRecords
     {
         parent::mount();
 
-        $this->folderName = request()->route('folderName');
         $this->loadFolder();
         $this->validateFolderAccess();
         session()->put('folder_id', $this->folder->id);
@@ -42,22 +41,25 @@ class ListMedia extends ManageRecords
         return [
             url('/') => 'Dashboard',
             FolderResourceFilament::getUrl('index') => 'folders',
-            null => $this->folderName ?? null,
+            null => $this->folder->name ?? null,
         ];
     }
 
     protected function loadFolder(): void
     {
-        if (! $this->folderName) {
-            abort(404, 'Folder name is required');
+        $folderUuid = request()->route('folder');
+
+        if (! $folderUuid) {
+            abort(404, 'Folder UUID is required');
         }
 
-        $this->folder = Folder::where('name', $this->folderName)->first();
-        $this->folder_id = $this->folder->id;
+        $this->folder = Folder::where('uuid', $folderUuid)->first();
 
         if (! $this->folder) {
             abort(404, 'Folder not found');
         }
+
+        $this->folder_id = $this->folder->id;
     }
 
     protected function validateFolderAccess(): void
