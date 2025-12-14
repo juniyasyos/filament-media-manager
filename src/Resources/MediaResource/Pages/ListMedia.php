@@ -96,9 +96,9 @@ class ListMedia extends ManageRecords
     public function folderAction(?Folder $item = null): Actions\Action
     {
         return Actions\Action::make('folderAction')
-            ->requiresConfirmation(fn (array $args) => $args['record']['is_protected'] ?? false)
-            ->form(fn (array $args) => $this->getPasswordForm($args['record']))
-            ->action(fn (array $args, array $data) => $this->handleFolderRedirect($args['record'], $data))
+            ->requiresConfirmation(fn(array $args) => $args['record']['is_protected'] ?? false)
+            ->form(fn(array $args) => $this->getPasswordForm($args['record']))
+            ->action(fn(array $args, array $data) => $this->handleFolderRedirect($args['record'], $data))
             ->view('filament-media-manager::pages.folder-action', ['item' => $item]);
     }
 
@@ -167,7 +167,7 @@ class ListMedia extends ManageRecords
             ->icon('heroicon-s-trash')
             ->color('danger')
             ->requiresConfirmation()
-            ->action(fn (array $arguments) => $this->handleDeleteMedia($arguments['record']['id'] ?? null));
+            ->action(fn(array $arguments) => $this->handleDeleteMedia($arguments['record']['id'] ?? null));
     }
 
     protected function handleDeleteMedia(?int $id): void
