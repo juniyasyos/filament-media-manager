@@ -21,9 +21,63 @@ class ViewFolder extends Page
     public ?Folder $folder = null;
     public $allMedia = [];
 
+    /**
+     * Load all folder relations and cross-model media in one place.
+     * allMedia fetches every media row sharing this collection_name,
+     * regardless of which model (Folder, ImutPenilaian, etc.) owns it.
+     */
+    protected function loadFolderData(): void
+    {
+        $this->folder->load([
+            'folders.media',   // subfolders + their direct media
+            'folders.folders', // nested subfolders (one level deep)
+            'media',           // media directly attached to this folder model
+            'parent.parent',   // two-level parent chain for breadcrumbs
+            'users',           // user-access pivot
+        ]);
+
+        // Fetch ALL media sharing this collection_name across ALL model types
+        // (e.g. ImutPenilaian, Folder, etc.) — not limited to this model's morph
+        $this->allMedia = $this->folder->getAllMediaByCollection();
+    }
+
     public function mount(Folder $folder): void
     {
-        $this->folder = $folder->load(['folders', 'media', 'parent']);
+        $this->folder = $folder;
+        $this->loadFolderData();
+
+        // if ($this->folder->uuid === 'dbaa6228-62df-4f51-8628-20fc4ec218b8') {
+        //     $mediaModel = class_exists('Spatie\MediaLibrary\MediaCollections\Models\Media')
+        //         ? 'Spatie\MediaLibrary\MediaCollections\Models\Media'
+        //         : 'Spatie\Permission\Models\Media';
+
+        //     $allMediaByCollection = $mediaModel::where('collection_name', $this->folder->collection)->get();
+        //     $directMedia = $this->folder->getMedia();
+        //     $pivotEntries = \DB::table('folder_has_models')->where('folder_id', $this->folder->id)->get();
+
+        //     dd([
+        //         '📁 FOLDER' => [
+        //             'id'         => $this->folder->id,
+        //             'uuid'       => $this->folder->uuid,
+        //             'name'       => $this->folder->name,
+        //             'collection' => $this->folder->collection,
+        //             'parent'     => $this->folder->parent?->name,
+        //         ],
+        //         '📄 MEDIA by collection_name (all model_types)' => $allMediaByCollection->map(fn($m) => [
+        //             'file_name'  => $m->file_name,
+        //             'size'       => $m->size,
+        //             'model_type' => $m->model_type,
+        //             'model_id'   => $m->model_id,
+        //         ])->toArray(),
+        //         '📄 MEDIA direct (model_type=Folder only)' => $directMedia->map(fn($m) => [
+        //             'file_name'  => $m->file_name,
+        //             'size'       => $m->size,
+        //             'model_type' => $m->model_type,
+        //             'model_id'   => $m->model_id,
+        //         ])->toArray(),
+        //         '🔗 PIVOT folder_has_models' => $pivotEntries->toArray(),
+        //     ]);
+        // }
 
         // Auto cleanup orphaned files/folders
         try {
@@ -34,22 +88,11 @@ class ViewFolder extends Page
                     ->info()
                     ->send();
 
-                // Reload folder after cleanup
-                $this->folder->refresh();
+                $this->loadFolderData();
             }
         } catch (\Exception $e) {
             \Log::error("Folder cleanup error: " . $e->getMessage());
         }
-
-        // Load ALL media files with this collection_name, regardless of model type
-        $this->allMedia = $this->folder->getAllMediaByCollection();
-        // dd([
-        //     'folder_name' => $this->folder->name,
-        //     'folder_uuid' => $this->folder->uuid,
-        //     'total_subfolders' => $this->folder->folders()->count(),
-        //     'total_files' => $this->folder->getMedia()->count(),
-        //     'folder' => $this->folder,
-        // ]);
     }
 
     public function getTitle(): string
@@ -147,8 +190,7 @@ class ViewFolder extends Page
                     ->success()
                     ->send();
 
-                // Reload folder with new subfolder
-                $this->folder->load('folders');
+                $this->loadFolderData();
             })
             ->modalWidth('md');
 
@@ -171,78 +213,44 @@ class ViewFolder extends Page
             ->action(function (array $data) {
                 $mediaDisk = config('media-library.disk_name', 's3');
                 $uploadCount = 0;
-                $debugInfo = [];
+                $failCount = 0;
 
                 foreach ($data['files'] as $filePath) {
                     try {
-                        // Get full path from public disk
                         $fullPath = storage_path('app/public/' . $filePath);
 
-                        $debugInfo[] = [
-                            'file_input_path' => $filePath,
-                            'full_path' => $fullPath,
-                            'file_exists' => file_exists($fullPath),
-                            'basename' => basename($filePath),
-                            'folder_id' => $this->folder->id,
-                            'folder_uuid' => $this->folder->uuid,
-                            'folder_collection' => $this->folder->collection,
-                            'media_disk' => $mediaDisk,
-                        ];
-
                         if (file_exists($fullPath)) {
-                            // Add media to folder dengan collection yang benar
-                            $media = $this->folder
+                            $this->folder
                                 ->addMedia($fullPath)
                                 ->usingFileName(basename($filePath))
                                 ->toMediaCollection($this->folder->collection, $mediaDisk);
 
-                            $debugInfo[] = [
-                                'upload_status' => 'SUCCESS',
-                                'media_id' => $media->id,
-                                'media_file_name' => $media->file_name,
-                                'media_collection_name' => $media->collection_name,
-                            ];
-
                             $uploadCount++;
-
-                            // Delete temporary file
-                            @unlink($fullPath);
                         } else {
-                            $debugInfo[] = [
-                                'upload_status' => 'FILE_NOT_FOUND',
-                                'message' => 'File tidak ditemukan di path: ' . $fullPath,
-                            ];
+                            $failCount++;
+                            \Log::warning('Upload: file not found at ' . $fullPath);
                         }
                     } catch (\Exception $e) {
-                        $debugInfo[] = [
-                            'upload_status' => 'ERROR',
-                            'error_message' => $e->getMessage(),
-                            'error_file' => $e->getFile(),
-                            'error_line' => $e->getLine(),
-                        ];
+                        $failCount++;
                         \Log::error('Upload failed: ' . $e->getMessage());
                     }
                 }
 
-                // Check media in database
-                $mediaInDb = $this->folder->media()->get();
+                if ($uploadCount > 0) {
+                    Notification::make()
+                        ->title("{$uploadCount} file(s) uploaded successfully")
+                        ->success()
+                        ->send();
+                }
 
-                // dd([
-                //     'upload_summary' => [
-                //         'total_files_processed' => count($data['files']),
-                //         'successful_uploads' => $uploadCount,
-                //         'folder_info' => [
-                //             'id' => $this->folder->id,
-                //             'uuid' => $this->folder->uuid,
-                //             'name' => $this->folder->name,
-                //             'collection' => $this->folder->collection,
-                //         ],
-                //     ],
-                //     'upload_details' => $debugInfo,
-                //     'media_in_database' => $mediaInDb,
-                //     'folder_media_count' => $this->folder->media()->count(),
-                //     'folder_getMedia_count' => $this->folder->getMedia()->count(),
-                // ]);
+                if ($failCount > 0) {
+                    Notification::make()
+                        ->title("{$failCount} file(s) failed to upload")
+                        ->danger()
+                        ->send();
+                }
+
+                $this->loadFolderData();
             })
             ->modalWidth('md');
 
@@ -306,8 +314,8 @@ class ViewFolder extends Page
                 ->success()
                 ->send();
 
-            // Reload media list
-            $this->folder->load('media');
+            // Reload all relations including cross-model media
+            $this->loadFolderData();
         } else {
             Notification::make()
                 ->title('File not found')

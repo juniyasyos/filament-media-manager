@@ -145,7 +145,7 @@
         @endif
 
         {{-- ================= FILES ================= --}}
-        @if($folder->media->count() > 0)
+        @if(count($allMedia) > 0)
         <div class="space-y-4">
             <div class="flex items-center gap-2">
                 <x-heroicon-o-document class="w-5 h-5 text-gray-500 dark:text-gray-400" />
@@ -153,7 +153,7 @@
                     Files
                 </h3>
                 <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">
-                    {{ $folder->media->count() }}
+                    {{ count($allMedia) }}
                 </span>
             </div>
 
@@ -164,7 +164,7 @@
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
                 class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
-                @foreach($folder->media as $media)
+                @foreach($allMedia as $media)
                 <div class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
 
                     {{-- Thumbnail --}}
@@ -250,7 +250,7 @@
                 x-transition:enter-start="opacity-0 scale-95"
                 x-transition:enter-end="opacity-100 scale-100"
                 class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-                @foreach($folder->media as $media)
+                @foreach($allMedia as $media)
                 <div class="group flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0">
 
                     {{-- Thumbnail --}}
@@ -309,7 +309,7 @@
         @endif
 
         {{-- ================= EMPTY STATE ================= --}}
-        @if($folder->folders->count() === 0 && $folder->media->count() === 0)
+        @if($folder->folders->count() === 0 && count($allMedia) === 0)
         <div class="flex flex-col items-center justify-center py-16 px-4">
             <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                 <x-heroicon-o-folder-open class="w-10 h-10 text-gray-400" />
