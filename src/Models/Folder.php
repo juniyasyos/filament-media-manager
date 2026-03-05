@@ -100,4 +100,48 @@ class Folder extends Model implements HasMedia
     {
         return $this->belongsTo(Folder::class, 'parent_id');
     }
+
+    /**
+     * Get all media files with this folder's collection name
+     */
+    public function getAllMediaByCollection()
+    {
+        $mediaModel = class_exists('Spatie\MediaLibrary\MediaCollections\Models\Media')
+            ? 'Spatie\MediaLibrary\MediaCollections\Models\Media'
+            : 'Spatie\Permission\Models\Media';
+
+        return $mediaModel::where('collection_name', $this->collection)->get();
+    }
+
+    /**
+     * Run full cleanup on folder and its media
+     * Only delete orphaned/missing media files, NOT folders
+     */
+    public function runFullCleanup()
+    {
+        $deleted = 0;
+
+        // Delete orphaned/missing media files only
+        $mediaItems = $this->getMedia();
+
+        foreach ($mediaItems as $media) {
+            try {
+                $disk = \Storage::disk(config('media-library.disk_name', 's3'));
+                $filePath = $media->getPathRelativeToRoot();
+
+                // Check if file exists, if not delete the media record
+                if (!$disk->exists($filePath)) {
+                    $media->delete();
+                    $deleted++;
+                }
+            } catch (\Exception $e) {
+                \Log::error("Media cleanup error: " . $e->getMessage());
+            }
+        }
+
+        return [
+            'media_deleted' => $deleted,
+            'folders_deleted' => 0
+        ];
+    }
 }
