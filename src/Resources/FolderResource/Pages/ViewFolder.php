@@ -3,6 +3,7 @@
 namespace Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 
 use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\Page;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -18,10 +19,37 @@ class ViewFolder extends Page
     protected static string $view = 'filament-media-manager::pages.view-folder';
 
     public ?Folder $folder = null;
+    public $allMedia = [];
 
     public function mount(Folder $folder): void
     {
         $this->folder = $folder->load(['folders', 'media', 'parent']);
+
+        // Auto cleanup orphaned files/folders
+        try {
+            $cleanupResult = $this->folder->runFullCleanup();
+            if ($cleanupResult['media_deleted'] > 0) {
+                \Filament\Notifications\Notification::make()
+                    ->title("Cleanup: {$cleanupResult['media_deleted']} orphaned file(s) removed")
+                    ->info()
+                    ->send();
+
+                // Reload folder after cleanup
+                $this->folder->refresh();
+            }
+        } catch (\Exception $e) {
+            \Log::error("Folder cleanup error: " . $e->getMessage());
+        }
+
+        // Load ALL media files with this collection_name, regardless of model type
+        $this->allMedia = $this->folder->getAllMediaByCollection();
+        // dd([
+        //     'folder_name' => $this->folder->name,
+        //     'folder_uuid' => $this->folder->uuid,
+        //     'total_subfolders' => $this->folder->folders()->count(),
+        //     'total_files' => $this->folder->getMedia()->count(),
+        //     'folder' => $this->folder,
+        // ]);
     }
 
     public function getTitle(): string
@@ -35,17 +63,39 @@ class ViewFolder extends Page
 
         // Back button
         if ($this->folder->parent) {
+            // Back to parent folder action
             $actions[] = Actions\Action::make('back')
                 ->label(trans('filament-media-manager::messages.folders.actions.back'))
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(FolderResource::getUrl('view', ['folder' => $this->folder->parent]));
+
+            // Delete action with redirect to parent folder after deletion
+            $actions[] = DeleteAction::make()
+                ->label('Delete Folder')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Delete Folder')
+                ->record($this->folder)
+                ->successRedirectUrl(FolderResource::getUrl('view', ['folder' => $this->folder->parent]));
         } else {
+            // Back to root folders action
             $actions[] = Actions\Action::make('back_to_root')
                 ->label('Back to Root')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
                 ->url(FolderResource::getUrl('index'));
+
+            // Delete action with redirect to root folders after deletion
+            $actions[] = DeleteAction::make()
+                ->label('Delete Folder')
+                ->icon('heroicon-o-trash')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalHeading('Delete Folder')
+                ->record($this->folder)
+                ->successRedirectUrl(FolderResource::getUrl('index'));
         }
 
         // Create subfolder action
@@ -121,43 +171,78 @@ class ViewFolder extends Page
             ->action(function (array $data) {
                 $mediaDisk = config('media-library.disk_name', 's3');
                 $uploadCount = 0;
+                $debugInfo = [];
 
                 foreach ($data['files'] as $filePath) {
                     try {
                         // Get full path from public disk
                         $fullPath = storage_path('app/public/' . $filePath);
 
+                        $debugInfo[] = [
+                            'file_input_path' => $filePath,
+                            'full_path' => $fullPath,
+                            'file_exists' => file_exists($fullPath),
+                            'basename' => basename($filePath),
+                            'folder_id' => $this->folder->id,
+                            'folder_uuid' => $this->folder->uuid,
+                            'folder_collection' => $this->folder->collection,
+                            'media_disk' => $mediaDisk,
+                        ];
+
                         if (file_exists($fullPath)) {
                             // Add media to folder dengan collection yang benar
-                            $this->folder
+                            $media = $this->folder
                                 ->addMedia($fullPath)
                                 ->usingFileName(basename($filePath))
                                 ->toMediaCollection($this->folder->collection, $mediaDisk);
+
+                            $debugInfo[] = [
+                                'upload_status' => 'SUCCESS',
+                                'media_id' => $media->id,
+                                'media_file_name' => $media->file_name,
+                                'media_collection_name' => $media->collection_name,
+                            ];
 
                             $uploadCount++;
 
                             // Delete temporary file
                             @unlink($fullPath);
+                        } else {
+                            $debugInfo[] = [
+                                'upload_status' => 'FILE_NOT_FOUND',
+                                'message' => 'File tidak ditemukan di path: ' . $fullPath,
+                            ];
                         }
                     } catch (\Exception $e) {
+                        $debugInfo[] = [
+                            'upload_status' => 'ERROR',
+                            'error_message' => $e->getMessage(),
+                            'error_file' => $e->getFile(),
+                            'error_line' => $e->getLine(),
+                        ];
                         \Log::error('Upload failed: ' . $e->getMessage());
                     }
                 }
 
-                if ($uploadCount > 0) {
-                    Notification::make()
-                        ->title("{$uploadCount} file(s) uploaded successfully to S3")
-                        ->success()
-                        ->send();
-                } else {
-                    Notification::make()
-                        ->title('Failed to upload files')
-                        ->danger()
-                        ->send();
-                }
+                // Check media in database
+                $mediaInDb = $this->folder->media()->get();
 
-                // Reload media
-                $this->folder->load('media');
+                // dd([
+                //     'upload_summary' => [
+                //         'total_files_processed' => count($data['files']),
+                //         'successful_uploads' => $uploadCount,
+                //         'folder_info' => [
+                //             'id' => $this->folder->id,
+                //             'uuid' => $this->folder->uuid,
+                //             'name' => $this->folder->name,
+                //             'collection' => $this->folder->collection,
+                //         ],
+                //     ],
+                //     'upload_details' => $debugInfo,
+                //     'media_in_database' => $mediaInDb,
+                //     'folder_media_count' => $this->folder->media()->count(),
+                //     'folder_getMedia_count' => $this->folder->getMedia()->count(),
+                // ]);
             })
             ->modalWidth('md');
 
