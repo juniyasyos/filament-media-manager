@@ -1,80 +1,88 @@
-<div class="relative group">
-    <x-filament-actions::action :action="$action" :badge="$getBadge()" :badge-color="$getBadgeColor()" dynamic-component="filament::button"
-        :label="$getLabel()" :size="$getSize()" class="fi-ac-icon-btn-action" color="gray">
-        <style>
-            .folder-icon- {
-                    {
-                    $item->id
-                }
-            }
+@php
+$targetUrl = null;
+$hasSubfolders = $item->folders()->exists();
 
-                {
-                width: 100px;
-                height: 70px;
+if (filament('filament-media-manager')->allowSubFolders || $hasSubfolders) {
+// navigate to folder view using UUID route key
+$targetUrl = \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('view', ['folder' => $item]);
+} else {
+// navigate to folder media using UUID route key
+$targetUrl = \Juniyasyos\FilamentMediaManager\Resources\MediaResource::getUrl('index', ['folder' => $item]);
+}
+@endphp
 
-                background-color: {
-                        {
-                        $item->color ?? '#f3c623'
-                    }
-                }
+<div class="folder-card"
+    style="position: relative; display: block; width: 100%; height:100%;"
+    onmouseenter="this.querySelector('.actions').style.opacity='1'"
+    onmouseleave="this.querySelector('.actions').style.opacity='0'">
 
-                ;
-                border-radius: 5px;
-                position: relative;
-                margin-top: 20px;
-                margin-right: 10px;
-                margin-left: 10px;
-                margin-bottom: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
+    <a
+        href="{{ $targetUrl }}"
+        class="folder-card-link"
+        style="
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            min-height: 180px;
+            text-align: left;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: inherit;
+            text-decoration: none;
+        "
+        onmouseover="this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'"
+        onmouseout="this.style.boxShadow='none'">
 
-            .folder-icon- {
-                    {
-                    $item->id
-                }
-            }
-
-            ::before {
-                content: "";
-                width: 40px;
-                height: 10px;
-
-                background-color: {
-                        {
-                        $item->color ?? '#f3c623'
-                    }
-                }
-
-                ;
-                border-radius: 5px 5px 0 0;
-                position: absolute;
-                top: -10px;
-                left: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-        </style>
-        <div class="flex flex-col justify-center items-center gap-4">
-            <div class="folder-icon-{{ $item->id }} flex flex-col items-center justify-center">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; flex:1;">
+            <!-- ICON -->
+            <div class="folder-icon-{{ $item->id }}"
+                style="display:flex; align-items:center; justify-content:center;">
                 @if ($item->icon)
-                <x-icon name="{{ $item->icon }}" class="text-white w-8 h-8" />
+                <x-icon name="{{ $item->icon }}" style="width:32px;height:32px;" />
                 @endif
             </div>
-            <div class="flex flex-col items-center justify-center my-2">
-                <div class="flex items-center gap-2">
-                    <h1 class="font-bold text-xl">{{ $item->name }}</h1>
+
+            <!-- TEXT -->
+            <div style="text-align: center; margin: 8px 0;">
+
+                <!-- TITLE -->
+                <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <h1 style="font-size:18px; font-weight:700; margin:0;" class="title">
+                        {{ $item->name }}
+                    </h1>
+
                     @if($item->folders()->count() > 0)
-                    <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-500 rounded-full">
+                    <span style="
+                            display:inline-flex;
+                            align-items:center;
+                            justify-content:center;
+                            padding:2px 8px;
+                            font-size:12px;
+                            font-weight:700;
+                            color:white;
+                            background:#3b82f6;
+                            border-radius:999px;
+                        ">
                         {{ $item->folders()->count() }}
                     </span>
                     @endif
                 </div>
 
-                <div class="flex justify-start mt-1 gap-2">
-                    <p class="text-gray-600 dark:text-gray-300 text-sm truncate ...">
+                <!-- META -->
+                <div style="margin-top:6px; font-size:13px;" class="meta">
+                    <span>
                         {{ $item->created_at->diffForHumans() }}
-                    </p>
+                    </span>
+
                     @if($item->parent)
-                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                    <span class="parent" style="margin-left:6px;">
                         • in {{ $item->parent->name }}
                     </span>
                     @endif
@@ -82,10 +90,81 @@
 
             </div>
         </div>
-    </x-filament-actions::action>
+    </a>
 
-    {{-- Folder Actions - Shown on hover --}}
-    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1">
-        {{ ($this->createSubfolderAction($item))(['folder' => $item]) }}
+    <!-- ACTION -->
+    <div class="actions"
+        style="
+            position:absolute;
+            top:8px;
+            right:8px;
+            z-index: 60;
+            opacity:0;
+            transition:opacity 0.2s ease;
+            display:flex;
+            gap:4px;
+        "
+        onclick="event.stopPropagation()">
+        <a href="{{ \Juniyasyos\FilamentMediaManager\Resources\FolderResource::getUrl('view', ['folder' => $item]) }}"
+            style="display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; background:#10b981; border-radius:999px; padding:4px 8px; text-decoration:none;">
+            Buka Folder
+        </a>
     </div>
+
 </div>
+
+
+<script>
+    (function() {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const wrappers = document.querySelectorAll('.folder-card');
+
+        wrappers.forEach(wrapper => {
+            const btn = wrapper.querySelector('button');
+            if (!btn) return;
+
+            // 🎨 Dark mode
+            if (isDark) {
+                btn.style.background = '#1f2937';
+                btn.style.borderColor = '#374151';
+                btn.style.color = '#f9fafb';
+
+                btn.querySelectorAll('.meta').forEach(el => el.style.color = '#d1d5db');
+                btn.querySelectorAll('.parent').forEach(el => el.style.color = '#9ca3af');
+            } else {
+                btn.style.background = '#ffffff';
+                btn.style.borderColor = '#e5e7eb';
+                btn.style.color = '#111827';
+
+                btn.querySelectorAll('.meta').forEach(el => el.style.color = '#6b7280');
+                btn.querySelectorAll('.parent').forEach(el => el.style.color = '#9ca3af');
+            }
+        });
+
+        // 🔥 Equal height khusus folder-card
+        function equalHeight() {
+            let maxHeight = 0;
+
+            wrappers.forEach(wrapper => {
+                const btn = wrapper.querySelector('button');
+                if (!btn) return;
+
+                btn.style.height = 'auto';
+                if (btn.offsetHeight > maxHeight) {
+                    maxHeight = btn.offsetHeight;
+                }
+            });
+
+            wrappers.forEach(wrapper => {
+                const btn = wrapper.querySelector('button');
+                if (!btn) return;
+
+                btn.style.height = maxHeight + 'px';
+            });
+        }
+
+        window.addEventListener('load', equalHeight);
+        window.addEventListener('resize', equalHeight);
+    })();
+</script>

@@ -37,4 +37,14 @@ return [
     'slug_folder' => 'folder',
 
     "navigation_sort" => 0,
+
+    // Additional plugin defaults
+    'allow_subfolders' => true,
+    'allow_user_access' => true,
+    'allow_create_subfolder' => true,
+    'allow_edit_folder' => true,
+    'allow_delete_folder' => true,
+    'allow_create_media' => true,
+    'allow_edit_media' => true,
+    'allow_delete_media' => true,
 ];

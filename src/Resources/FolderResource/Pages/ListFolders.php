@@ -71,7 +71,7 @@ class ListFolders extends ManageRecords
     {
         return Actions\Action::make('folderAction')
             ->requiresConfirmation(fn(array $arguments) => $this->shouldRequirePassword($arguments['record']))
-            ->form(fn(array $arguments) => $this->getPasswordForm($arguments['record']))
+            ->schema(fn(array $arguments) => $this->getPasswordForm($arguments['record']))
             ->action(fn(array $arguments, array $data) => $this->handleFolderAction($arguments['record'], $data))
             ->view('filament-media-manager::pages.folder-action', ['item' => $item]);
     }
@@ -211,6 +211,10 @@ class ListFolders extends ManageRecords
 
     protected function handleFolderAction(array $record, array $data)
     {
+        dd([
+            'record' => $record,
+            'data' => $data,
+        ]);
         if ($this->shouldRequirePassword($record)) {
             if (!isset($data['password']) || $data['password'] !== $record['password']) {
                 Notification::make()

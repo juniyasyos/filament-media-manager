@@ -13,18 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('media_has_models', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('media_has_models')) {
+            Schema::create('media_has_models', function (Blueprint $table) {
+                $table->id();
 
-            //Morph
-            $table->string('model_type');
-            $table->unsignedBigInteger('model_id');
+                //Morph
+                $table->string('model_type');
+                $table->unsignedBigInteger('model_id');
 
-            //Folder
-            $table->foreignId('media_id')->constrained('media')->onDelete('cascade');
+                //Folder
+                $table->foreignId('media_id')->constrained('media')->onDelete('cascade');
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -4,16 +4,20 @@ namespace Juniyasyos\FilamentMediaManager\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use TomatoPHP\FilamentIcons\Components\IconPicker;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BackedEnum;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Table;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\FolderResource\RelationManagers;
 
@@ -31,7 +35,7 @@ class FolderResource extends Resource implements HasShieldPermissions
     protected static bool $isScopedToTenant = false;
 
 
-    protected static ?string $navigationIcon = 'heroicon-o-folder';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-folder';
 
 
     public static function getModel(): string
@@ -65,10 +69,11 @@ class FolderResource extends Resource implements HasShieldPermissions
         return trans('filament-media-manager::messages.folders.group');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->columns(2)
+            ->components([
                 Forms\Components\Hidden::make('user_id')
                     ->visible(config('filament-media-manager.allow_user_access', false))
                     ->default(Auth::id()),
@@ -93,7 +98,7 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->label(trans('filament-media-manager::messages.folders.columns.name'))
                     ->columnSpanFull()
                     ->lazy()
-                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get) {
+                    ->afterStateUpdated(function ($set, $get) {
                         $set('collection', Str::slug($get('name')));
                     })
                     ->required()
@@ -119,20 +124,20 @@ class FolderResource extends Resource implements HasShieldPermissions
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('password')
                     ->label(trans('filament-media-manager::messages.folders.columns.password'))
-                    ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                    ->hidden(fn($get) => !$get('is_protected'))
                     ->password()
                     ->revealable()
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('password_confirmation')
                     ->label(trans('filament-media-manager::messages.folders.columns.password_confirmation'))
-                    ->hidden(fn(Forms\Get $get) => !$get('is_protected'))
+                    ->hidden(fn($get) => !$get('is_protected'))
                     ->password()
                     ->required()
                     ->revealable()
                     ->same('password')
                     ->maxLength(255)
-            ])->columns(2);
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -215,11 +220,11 @@ class FolderResource extends Resource implements HasShieldPermissions
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -235,6 +240,7 @@ class FolderResource extends Resource implements HasShieldPermissions
     {
         return [
             'index' => Pages\ListFolders::route('/'),
+            'view' => Pages\ViewFolder::route('/{folder}'),
             'media' => \Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages\ListMedia::route('/{folder}/media'),
         ];
     }

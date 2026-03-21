@@ -4,6 +4,7 @@ namespace Juniyasyos\FilamentMediaManager\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -44,7 +45,7 @@ class Folder extends Model implements HasMedia
      */
     public function getRouteKeyName(): string
     {
-        return 'uuid';
+        return Schema::hasColumn($this->getTable(), 'uuid') ? 'uuid' : 'id';
     }
 
     public function model()
@@ -66,10 +67,12 @@ class Folder extends Model implements HasMedia
     {
         parent::boot();
 
-        // Auto-generate UUID on creation
+        // Auto-generate UUID on creation if the column exists
         static::creating(function ($folder) {
-            if (empty($folder->uuid)) {
-                $folder->uuid = (string) \Illuminate\Support\Str::uuid();
+            if (Schema::hasColumn($folder->getTable(), 'uuid')) {
+                if (empty($folder->uuid)) {
+                    $folder->uuid = (string) \Illuminate\Support\Str::uuid();
+                }
             }
         });
 

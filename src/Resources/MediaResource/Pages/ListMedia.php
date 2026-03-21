@@ -53,7 +53,11 @@ class ListMedia extends ManageRecords
             abort(404, 'Folder UUID is required');
         }
 
-        $this->folder = Folder::where('uuid', $folderUuid)->first();
+        if ($folderUuid instanceof Folder) {
+            $this->folder = $folderUuid;
+        } else {
+            $this->folder = Folder::where('uuid', $folderUuid)->first();
+        }
 
         if (! $this->folder) {
             abort(404, 'Folder not found');
@@ -117,7 +121,6 @@ class ListMedia extends ManageRecords
 
     protected function handleFolderRedirect(array $record, array $data)
     {
-        dd($record, $data);
         if ($record['is_protected'] && ($record['password'] !== ($data['password'] ?? null))) {
             return $this->notifyWrongPassword();
         }

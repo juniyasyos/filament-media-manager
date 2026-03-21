@@ -37,8 +37,10 @@ class FilamentMediaManagerPlugin implements Plugin
     {
         // Optional: Cek apakah module aktif jika pakai nwidart
         $this->isActive = config('filament-media-manager.filament.active', true);
-            // && (! class_exists(\Nwidart\Modules\Facades\Module::class)
-            //     || \Nwidart\Modules\Facades\Module::find('FilamentMediaManager')?->isEnabled());
+
+        // Load defaults from config
+        $this->allowSubFolders = config('filament-media-manager.allow_subfolders', true);
+        $this->allowUserAccess = config('filament-media-manager.allow_user_access', true);
 
         // dd([
         //     config('filament-media-manager.filament.active', true),

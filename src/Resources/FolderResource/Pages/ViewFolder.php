@@ -16,7 +16,7 @@ class ViewFolder extends Page
 {
     protected static string $resource = FolderResource::class;
 
-    protected static string $view = 'filament-media-manager::pages.view-folder';
+    protected string $view = 'filament-media-manager::pages.view-folder';
 
     public ?Folder $folder = null;
     public $allMedia = [];
@@ -174,8 +174,8 @@ class ViewFolder extends Page
                     ->label(trans('filament-media-manager::messages.folders.columns.password'))
                     ->password()
                     ->revealable()
-                    ->visible(fn(Forms\Get $get) => $get('is_protected'))
-                    ->required(fn(Forms\Get $get) => $get('is_protected'))
+                    ->visible(fn($get) => $get('is_protected'))
+                    ->required(fn($get) => $get('is_protected'))
                     ->maxLength(255),
             ])
             ->action(function (array $data) {

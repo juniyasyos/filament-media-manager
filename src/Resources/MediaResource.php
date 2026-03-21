@@ -4,14 +4,18 @@ namespace Juniyasyos\FilamentMediaManager\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Facades\Filament;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Juniyasyos\FilamentMediaManager\Models\Media;
 use Juniyasyos\FilamentMediaManager\Models\Folder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BackedEnum;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\Pages;
 use Juniyasyos\FilamentMediaManager\Resources\MediaResource\RelationManagers;
@@ -28,7 +32,7 @@ class MediaResource extends Resource implements HasShieldPermissions
         ];
     }
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
 
@@ -47,9 +51,9 @@ class MediaResource extends Resource implements HasShieldPermissions
         return trans('filament-media-manager::messages.media.single');
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form;
+        return $schema;
     }
 
     public static function table(Table $table): Table
@@ -128,7 +132,7 @@ class MediaResource extends Resource implements HasShieldPermissions
             ])
             ->defaultSort('order_column', 'asc')
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->defaultPaginationPageOption(12)
             ->paginationPageOptions([
@@ -138,8 +142,8 @@ class MediaResource extends Resource implements HasShieldPermissions
                 "96",
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

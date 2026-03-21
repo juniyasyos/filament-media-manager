@@ -2,6 +2,8 @@
 
 # Filament media manager
 
+> ✅ Now compatible with **Filament v4+** (Laravel 11/12)
+
 [![Latest Stable Version](https://poser.pugx.org/juniyasyos/filament-media-manager/version.svg)](https://packagist.org/packages/juniyasyos/filament-media-manager)
 [![License](https://poser.pugx.org/juniyasyos/filament-media-manager/license.svg)](https://packagist.org/packages/juniyasyos/filament-media-manager)
 [![Downloads](https://poser.pugx.org/juniyasyos/filament-media-manager/d/total.svg)](https://packagist.org/packages/juniyasyos/filament-media-manager)

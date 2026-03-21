@@ -13,12 +13,29 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('folders', function (Blueprint $table) {
-            $table->boolean('is_public')->default(true)->nullable();
-            $table->boolean('has_user_access')->default(false)->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->string('user_type')->nullable();
-        });
+        if (! Schema::hasColumn('folders', 'is_public')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->boolean('is_public')->default(true)->nullable();
+            });
+        }
+
+        if (! Schema::hasColumn('folders', 'has_user_access')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->boolean('has_user_access')->default(false)->nullable();
+            });
+        }
+
+        if (! Schema::hasColumn('folders', 'user_id')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->unsignedBigInteger('user_id')->nullable();
+            });
+        }
+
+        if (! Schema::hasColumn('folders', 'user_type')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->string('user_type')->nullable();
+            });
+        }
     }
 
     /**
@@ -28,11 +45,28 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('folders', function (Blueprint $table) {
-            $table->dropColumn('is_public');
-            $table->dropColumn('has_user_access');
-            $table->dropColumn('user_id');
-            $table->dropColumn('user_type');
-        });
+        if (Schema::hasColumn('folders', 'is_public')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->dropColumn('is_public');
+            });
+        }
+
+        if (Schema::hasColumn('folders', 'has_user_access')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->dropColumn('has_user_access');
+            });
+        }
+
+        if (Schema::hasColumn('folders', 'user_id')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->dropColumn('user_id');
+            });
+        }
+
+        if (Schema::hasColumn('folders', 'user_type')) {
+            Schema::table('folders', function (Blueprint $table) {
+                $table->dropColumn('user_type');
+            });
+        }
     }
 };

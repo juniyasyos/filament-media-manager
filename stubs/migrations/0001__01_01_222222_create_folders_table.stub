@@ -13,28 +13,31 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('folders', function (Blueprint $table) {
-            $table->id();
+        if (! Schema::hasTable('folders')) {
+            Schema::create('folders', function (Blueprint $table) {
+                $table->id();
+                $table->uuid('uuid')->unique();
 
-            //Morph
-            $table->string('model_type')->nullable();
-            $table->unsignedBigInteger('model_id')->nullable();
+                //Morph
+                $table->string('model_type')->nullable();
+                $table->unsignedBigInteger('model_id')->nullable();
 
-            //Folder
-            $table->string('name')->index();
-            $table->string('collection')->nullable()->index();
-            $table->string('description')->nullable();
-            $table->string('icon')->nullable();
-            $table->string('color')->nullable();
+                //Folder
+                $table->string('name')->index();
+                $table->string('collection')->nullable()->index();
+                $table->string('description')->nullable();
+                $table->string('icon')->nullable();
+                $table->string('color')->nullable();
 
-            //Options
-            $table->boolean('is_protected')->default(false)->nullable();
-            $table->string('password')->nullable();
-            $table->boolean('is_hidden')->default(false)->nullable();
-            $table->boolean('is_favorite')->default(false)->nullable();
+                //Options
+                $table->boolean('is_protected')->default(false)->nullable();
+                $table->string('password')->nullable();
+                $table->boolean('is_hidden')->default(false)->nullable();
+                $table->boolean('is_favorite')->default(false)->nullable();
 
-            $table->timestamps();
-        });
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -23,8 +23,56 @@ $parentFolder = $parentId ? \Juniyasyos\FilamentMediaManager\Models\Folder::find
 </div>
 @endif
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+<div class="grid-box"
+    style="
+        display:grid;
+        grid-template-columns:3fr;
+        gap:16px;
+        padding:16px;
+     ">
+
     @foreach($records as $item)
     {{ ($this->folderAction($item))(['record' => $item]) }}
     @endforeach
+
 </div>
+
+
+<script>
+    (function() {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // parent box
+        document.querySelectorAll('.parent-box').forEach(box => {
+            if (isDark) {
+                box.style.background = '#1f2937';
+                box.style.borderColor = '#374151';
+
+                box.querySelectorAll('.title').forEach(el => el.style.color = '#f9fafb');
+                box.querySelectorAll('.desc').forEach(el => el.style.color = '#d1d5db');
+                box.querySelectorAll('.icon').forEach(el => el.style.color = '#9ca3af');
+            } else {
+                box.style.background = '#f9fafb';
+                box.style.borderColor = '#e5e7eb';
+
+                box.querySelectorAll('.title').forEach(el => el.style.color = '#111827');
+                box.querySelectorAll('.desc').forEach(el => el.style.color = '#6b7280');
+                box.querySelectorAll('.icon').forEach(el => el.style.color = '#6b7280');
+            }
+        });
+
+        // responsive grid (md:3)
+        function updateGrid() {
+            document.querySelectorAll('.grid-box').forEach(grid => {
+                if (window.innerWidth >= 768) {
+                    grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                } else {
+                    grid.style.gridTemplateColumns = '1fr';
+                }
+            });
+        }
+
+        updateGrid();
+        window.addEventListener('resize', updateGrid);
+    })();
+</script>
